@@ -13,7 +13,11 @@ dotenv.config();
 // Middleware to parse JSON bodies in requests
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://ddebnath-smc-ecommerce-2026.vercel.app",
+    ],
+
     credentials: true,
   }),
 );
