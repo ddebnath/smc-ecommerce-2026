@@ -13,8 +13,6 @@ import "dotenv/config";
   throws an error.
 */
 
-import nodemailer from "nodemailer";
-
 export const verifyEmail = async (token, email) => {
   try {
     // 🔹 Create transporter
