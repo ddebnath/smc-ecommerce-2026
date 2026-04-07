@@ -12,24 +12,24 @@ import "dotenv/config";
   message if the email is sent successfully. If there is an error during this process, it 
   throws an error.
 */
-export const verifyEmail = (token, email) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: process.env.MAIL_PORT,
-    secure: false,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
-    },
-  });
-
+export const verifyEmail = async (token, email) => {
   // const transporter = nodemailer.createTransport({
-  //   service: "gmail",
+  //   host: process.env.MAIL_HOST,
+  //   port: process.env.MAIL_PORT,
+  //   secure: false,
   //   auth: {
   //     user: process.env.MAIL_USER,
-  //     pass: process.env.MAIL_PASSWORD,
+  //     pass: process.env.MAIL_PASS,
   //   },
   // });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASSWORD,
+    },
+  });
 
   const mailConfigurations = {
     // It should be a string of sender/server email
@@ -48,9 +48,12 @@ export const verifyEmail = (token, email) => {
            Thanks`,
   };
 
-  transporter.sendMail(mailConfigurations, function (error, info) {
-    if (error) throw Error(error);
+  try {
+    const info = await transporter.sendMail(mailConfigurations);
     console.log("Email Sent Successfully");
-    console.log(info);
-  });
+    console.log(info.response);
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw new Error("Failed to send verification email");
+  }
 };
