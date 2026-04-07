@@ -11,13 +11,14 @@ const app = express();
 dotenv.config();
 
 // Middleware to parse JSON bodies in requests
-app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
   }),
 );
+
+app.use(express.json());
 
 // Use the user routes for any requests to /api/v1/user. This means that any request
 // to such as /api/v1/user/register or /api/v1/user/verify, etc. will be handled by
