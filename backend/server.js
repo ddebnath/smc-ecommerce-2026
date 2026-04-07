@@ -23,6 +23,11 @@ app.use(express.json());
 // Use the user routes for any requests to /api/v1/user. This means that any request
 // to such as /api/v1/user/register or /api/v1/user/verify, etc. will be handled by
 // the corresponding functions in user.controllers.js.
+
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
 app.use("/api/v1/user", routes);
 
 // Start the server and listen on the specified port. When the server starts, it will
