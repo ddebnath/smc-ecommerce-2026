@@ -14,12 +14,22 @@ import "dotenv/config";
 */
 export const verifyEmail = (token, email) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: false,
     auth: {
       user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASSWORD,
+      pass: process.env.MAIL_PASS,
     },
   });
+
+  // const transporter = nodemailer.createTransport({
+  //   service: "gmail",
+  //   auth: {
+  //     user: process.env.MAIL_USER,
+  //     pass: process.env.MAIL_PASSWORD,
+  //   },
+  // });
 
   const mailConfigurations = {
     // It should be a string of sender/server email
