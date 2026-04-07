@@ -13,16 +13,6 @@ import "dotenv/config";
   throws an error.
 */
 export const verifyEmail = async (token, email) => {
-  // const transporter = nodemailer.createTransport({
-  //   host: process.env.MAIL_HOST,
-  //   port: process.env.MAIL_PORT,
-  //   secure: false,
-  //   auth: {
-  //     user: process.env.MAIL_USER,
-  //     pass: process.env.MAIL_PASS,
-  //   },
-  // });
-
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -30,6 +20,9 @@ export const verifyEmail = async (token, email) => {
       pass: process.env.MAIL_PASSWORD,
     },
   });
+
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const verificationLink = `${frontendUrl}/auth/verify/${token}`;
 
   const mailConfigurations = {
     // It should be a string of sender/server email
@@ -44,7 +37,7 @@ export const verifyEmail = async (token, email) => {
     text: `Hi! There, You have recently visited 
            our website and entered your email.
            Please follow the given link to verify your email
-           http://localhost:5173/auth/verify/${token} 
+           ${verificationLink}
            Thanks`,
   };
 
@@ -52,7 +45,9 @@ export const verifyEmail = async (token, email) => {
     const info = await transporter.sendMail(mailConfigurations);
     console.log("Email Sent Successfully");
     console.log(info.response);
+    return info;
   } catch (error) {
     console.error("Error sending email:", error);
+    throw error;
   }
 };

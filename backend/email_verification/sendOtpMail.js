@@ -13,34 +13,38 @@ import "dotenv/config";
   throws an error.
 */
 export const sendOtpMail = async (otp, email) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASSWORD,
-    },
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD,
+      },
+    });
 
-  const mailConfigurations = {
-    // It should be a string of sender/server email
-    from: process.env.MAIL_USER,
+    const mailConfigurations = {
+      // It should be a string of sender/server email
+      from: process.env.MAIL_USER,
 
-    to: email,
+      to: email,
 
-    // Subject of Email
-    subject: "Password Reset OTP",
+      // Subject of Email
+      subject: "Password Reset OTP",
 
-    // This would be the text of email body
-    text: `Hi! There, You have recently visited 
-           our website and entered your email.
-           Please use the following OTP to reset your password
-           ${otp}
-           Thanks`,
-  };
+      // This would be the text of email body
+      text: `Hi! There, You have recently visited 
+             our website and entered your email.
+             Please use the following OTP to reset your password
+             ${otp}
+             Thanks`,
+    };
 
-  transporter.sendMail(mailConfigurations, function (error, info) {
-    if (error) throw Error(error);
+    const info = await transporter.sendMail(mailConfigurations);
     console.log("OTP Sent Successfully");
-    console.log(info);
-  });
+    console.log(info.response);
+    return info;
+  } catch (error) {
+    console.error("Error sending OTP email:", error);
+    throw error;
+  }
 };

@@ -58,7 +58,7 @@ export const register = async (req, res) => {
       the verification process, which will check the token against the one stored in the database
       and verify the user's email if the token is valid.
     */
-    verifyEmail(token, email);
+    await verifyEmail(token, email);
 
     /*
       The generated token is then saved in the user's record in the database. This allows us to
@@ -187,7 +187,7 @@ export const reVerify = async (req, res) => {
       expiresIn: "10m",
     });
 
-    verifyEmail(token, email); // sending email for verification
+    await verifyEmail(token, email); // sending email for verification
     user.token = token;
 
     await user.save();
