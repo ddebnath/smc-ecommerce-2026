@@ -65,6 +65,8 @@ const Signup = () => {
           setTimeout(() => {
             navigate("/auth/verify");
           }, 1000);
+        } else {
+          toast.error(res.data.message, { position: "top-center" });
         }
       }
     } catch (error) {
