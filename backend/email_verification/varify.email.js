@@ -12,42 +12,54 @@ import "dotenv/config";
   message if the email is sent successfully. If there is an error during this process, it 
   throws an error.
 */
-export const verifyEmail = (token, email) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASSWORD,
-    },
-  });
 
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const verificationLink = `${frontendUrl}/auth/verify/${token}`;
+import nodemailer from "nodemailer";
 
-  const mailConfigurations = {
-    // It should be a string of sender/server email
-    from: process.env.MAIL_USER,
-
-    to: email,
-
-    // Subject of Email
-    subject: "Email Verification",
-
-    // This would be the text of email body
-    text: `Hi! There, You have recently visited 
-           our website and entered your email.
-           Please follow the given link to verify your email
-           ${verificationLink}
-           Thanks`,
-  };
-
+export const verifyEmail = async (token, email) => {
   try {
-    const info = transporter.sendMail(mailConfigurations);
-    console.log("Email Sent Successfully");
-    console.log(info.response);
+    // 🔹 Create transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // using Gmail
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD, // ⚠️ must match env name
+      },
+    });
+
+    // 🔹 Frontend URL (for verification link)
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    const verificationLink = `${frontendUrl}/auth/verify/${token}`;
+
+    // 🔹 Mail content
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "Verify Your Email",
+
+      // plain text (fallback)
+      text: `Click the link to verify your email: ${verificationLink}`,
+
+      // better UI
+      html: `
+        <h2>Email Verification</h2>
+        <p>Please click the button below to verify your email:</p>
+        <a href="${verificationLink}" 
+           style="padding:10px 20px; background:#4CAF50; color:#fff; text-decoration:none;">
+           Verify Email
+        </a>
+        <p>If you did not request this, ignore this email.</p>
+      `,
+    };
+
+    // 🔹 Send email
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log("✅ Email sent:", info.response);
+
     return info;
   } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
+    console.error("❌ Email error:", error.message);
+    throw new Error("Failed to send verification email");
   }
 };
