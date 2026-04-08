@@ -73,7 +73,7 @@
 import dotenv from "dotenv";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(`${process.env.RESEND_API_KEY}`);
 dotenv.config();
 
 export const verifyEmail = async (token, email) => {
