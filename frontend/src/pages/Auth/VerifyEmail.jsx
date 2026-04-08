@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { API_URL } from "@/config/api";
@@ -31,7 +31,7 @@ const VerifyEmail = () => {
         toast.success(res.data.message, { position: "top-center" });
         setStatus("success");
         setMessage(res.data.message || "Email verified successfully.");
-        <Navigate to="/auth/login" replace />; // Redirect to login page after successful verification
+        // <Navigate to="/auth/login" replace />; // Redirect to login page after successful verification
       }
     } catch (error) {
       const errorMessage =

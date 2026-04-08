@@ -34,7 +34,7 @@ export const verifyEmail = async (token, email) => {
     // Frontend URL (for verification link)
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-    const verificationLink = `${frontendUrl}/auth/verify/${token}`;
+    const verificationLink = `${frontendUrl}/api/v1/user/auth/verify/${token}`;
 
     // Mail content
     const mailOptions = {
