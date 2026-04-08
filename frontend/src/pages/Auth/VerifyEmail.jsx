@@ -16,6 +16,8 @@ const VerifyEmail = () => {
       return;
     }
 
+    console.log("Verifying token:", token);
+
     try {
       const res = await axios.post(
         `${API_URL}/user/auth/verify`,
