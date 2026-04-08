@@ -37,6 +37,7 @@ const VerifyEmail = () => {
       const errorMessage =
         error?.res?.data?.message ||
         "Unable to verify your email. Please try again.";
+      toast.error(errorMessage, { position: "top-center" });
       setStatus("error");
       setMessage(errorMessage);
     }
