@@ -70,32 +70,20 @@
 //   }
 // };
 
-import { Resend } from "resend";
 import dotenv from "dotenv";
-dotenv.config();
+import { Resend } from "resend";
+
 const resend = new Resend(process.env.RESEND_API_KEY);
+dotenv.config();
 
 export const verifyEmail = async (token, email) => {
-  try {
-    console.log("resend api key", process.env.RESEND_API_KEY);
+  console.log("Sending email to:", email); // debug
+  const link = `${process.env.FRONTEND_URL}/auth/verify/${token}`;
 
-    const verificationLink = `${process.env.FRONTEND_URL}/auth/verify/${token}`;
-
-    const response = await resend.emails.send({
-      from: "onboarding@resend.dev", // default test sender
-      to: email,
-      subject: "Verify Your Email",
-      html: `
-        <h2>Email Verification</h2>
-        <p>Click below to verify your email:</p>
-        <a href="${verificationLink}">Verify Email</a>
-      `,
-    });
-
-    console.log("✅ Email sent:", response);
-    return response;
-  } catch (error) {
-    console.error("❌ Email error:", error);
-    throw error;
-  }
+  return await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: email,
+    subject: "Verify your email",
+    html: `<a href="${link}">Verify Email</a>`,
+  });
 };
