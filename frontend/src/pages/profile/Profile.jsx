@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
+import profilePic from "../../assets/Dipankar_Debnath.jpg";
+import { API_URL } from "@/config/api.js";
 import {
   Card,
   CardContent,
@@ -8,214 +11,234 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
+import axios from "axios";
+import { setUser } from "@/redux/slices/userSlice";
 
 const Profile = () => {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    profilePic: null,
+  const { user } = useSelector((store) => store.user);
+  const params = useParams();
+  const userId = params.userId; // Fallback for testing
+
+  const [updateUser, setUpdateUser] = useState({
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    email: user?.email,
+    phoneNo: user?.phoneNo,
+    address: user?.address,
+    city: user?.city,
+    zipcode: user?.zipcode,
+    profilePic: user?.profilePic,
+    role: user?.role,
   });
 
-  const [preview, setPreview] = useState(null);
+  const [file, setFile] = useState(null);
 
-  // 🔹 Dummy orders (replace with API later)
-  const orders = [
-    {
-      id: "ORD1234",
-      date: "12 Apr 2026",
-      total: 999,
-      status: "Delivered",
-      items: ["T-Shirt", "Jeans"],
-    },
-    {
-      id: "ORD5678",
-      date: "05 Apr 2026",
-      total: 1499,
-      status: "Shipped",
-      items: ["Shoes"],
-    },
-  ];
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    setUpdateUser({
+      ...updateUser,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-    if (name === "profilePic") {
-      const file = files[0];
-      setFormData({ ...formData, profilePic: file });
-      setPreview(URL.createObjectURL(file));
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+
+    setUpdateUser({
+      ...updateUser,
+      profilePic: URL.createObjectURL(selectedFile), // Update the profilePic field with the selected image's URL for preview
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key]) data.append(key, formData[key]);
-    });
+    const accessToken = localStorage.getItem("accessToken");
 
     try {
-      await fetch("http://localhost:8000/api/v1/user/update-profile", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer YOUR_TOKEN`,
-        },
-        body: data,
-      });
+      //use form data to send file and other data together
+      const formData = new FormData();
+      formData.append("firstName", updateUser.firstName);
+      formData.append("lastName", updateUser.lastName);
+      formData.append("email", updateUser.email);
+      formData.append("phoneNo", updateUser.phoneNo);
+      formData.append("address", updateUser.address);
+      formData.append("city", updateUser.city);
+      formData.append("zipcode", updateUser.zipcode);
 
-      alert("Profile updated successfully");
-    } catch {
-      alert("Error updating profile");
+      if (file) {
+        formData.append("file", file); // Append the file to the form data
+      }
+
+      const response = await axios.put(
+        `${API_URL}/user/auth/update-user/${userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      if (response.data.user) {
+        toast.success("Profile updated successfully!");
+        dispatch(setUser(response.data.user)); // Update the user in the Redux store with the new data
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update profile. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-slate-900 px-4">
-      <div className="w-full max-w-3xl">
-        <Tabs defaultValue="settings" className="w-full">
-          {/* Tabs */}
-          <TabsList className="grid grid-cols-2 bg-gray-800 text-white rounded-xl mb-6">
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-          </TabsList>
-
-          {/* ================= SETTINGS ================= */}
-          <TabsContent value="settings">
-            <Card className="bg-gray-900/80 backdrop-blur-xl border border-gray-700 shadow-2xl rounded-3xl">
-              <CardHeader className="text-center">
-                <CardTitle className="text-3xl text-white">
-                  Profile Settings
-                </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Update your personal details
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Image */}
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-24 h-24 rounded-full bg-gray-800 border-2 border-blue-500 overflow-hidden">
-                      {preview ? (
-                        <img
-                          src={preview}
-                          alt="preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500 text-xs">
-                          Upload
-                        </div>
-                      )}
-                    </div>
-
+    <div className="pt-20 min-h-screen bg-gray-100">
+      <Tabs defaultValue="profile" className="max-w-7xl mx-auto items-center">
+        <TabsList>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+        </TabsList>
+        <TabsContent value="profile">
+          <div>
+            <div className="flex flex-col justify-center items-center bg-gray-100">
+              <h1 className="font-bold mb-7 text-2xl text-gray-800">
+                Update Profile
+              </h1>
+              <div className="w-full flex gap-10 justify-between items-start px-7 max-w-2xl">
+                {/* Profile Picture */}
+                <div className="flex flex-col items-center">
+                  <img
+                    src={updateUser.profilePic || profilePic}
+                    alt="profile"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-blue-600"
+                  />
+                  <Label className="mt-4 cursor-pointer bg-blue-700 text-white px-2 py-2 rounded-lg hover:bg-blue-500">
+                    change picture
                     <input
                       type="file"
-                      name="profilePic"
                       accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </Label>
+                </div>
+                {/* Profile Form */}
+                <form
+                  className="space-y-4 shadow-lg p-5 rounded-lg bg-white"
+                  onSubmit={handleSubmit}
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        placeholder="first name"
+                        value={updateUser.firstName}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg px-3 py-2 mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        placeholder="last name"
+                        value={updateUser.lastName}
+                        onChange={handleChange}
+                        className="w-full border rounded-lg px-3 py-2 mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email Id</Label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={updateUser.email}
                       onChange={handleChange}
-                      className="text-sm text-gray-300 file:bg-blue-600 file:text-white file:px-3 file:py-1 file:rounded"
+                      disabled
+                      className="w-full border rounded-lg px-3 py-2 mt-1 bg-gray-200 cursor-not-allowed"
                     />
                   </div>
-
-                  {/* Name */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phoneNo">Mobile Number</Label>
                     <input
-                      type="text"
-                      name="firstName"
-                      placeholder="First Name"
+                      type="number"
+                      name="phoneNo"
+                      value={updateUser.phoneNo}
                       onChange={handleChange}
-                      className="p-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500"
-                    />
-                    <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Last Name"
-                      onChange={handleChange}
-                      className="p-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500"
+                      placeholder="enter phone number"
+                      className="w-full border rounded-lg px-3 py-2 mt-1"
                     />
                   </div>
-
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    onChange={handleChange}
-                    className="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500"
-                  />
-
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="New Password"
-                    onChange={handleChange}
-                    className="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500"
-                  />
-
-                  <button className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:scale-[1.02] transition">
-                    Save Changes
-                  </button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ================= ORDERS ================= */}
-          <TabsContent value="orders">
-            <Card className="bg-gray-900/80 backdrop-blur-xl border border-gray-700 shadow-2xl rounded-3xl text-white">
-              <CardHeader>
-                <CardTitle className="text-2xl">Your Orders</CardTitle>
-                <CardDescription className="text-gray-400">
-                  View and track your purchases
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-blue-500 transition"
+                  <div>
+                    <Label htmlFor="address">Address</Label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={updateUser.address}
+                      onChange={handleChange}
+                      placeholder="enter address"
+                      className="w-full border rounded-lg px-3 py-2 mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={updateUser.city}
+                      onChange={handleChange}
+                      placeholder="enter city"
+                      className="w-full border rounded-lg px-3 py-2 mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zip code">Zip Code</Label>
+                    <input
+                      type="text"
+                      name="zipcode"
+                      value={updateUser.zipcode}
+                      onChange={handleChange}
+                      placeholder="enter zipcode"
+                      className="w-full border rounded-lg px-3 py-2 mt-1"
+                    />
+                  </div>
+                  <Button
+                    className="w-full mt-4 bg-pink-600 hover:bg-pink-400"
+                    type="submit"
                   >
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold">{order.id}</h3>
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          order.status === "Delivered"
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-yellow-500/20 text-yellow-400"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-
-                    <p className="text-sm text-gray-400">Date: {order.date}</p>
-
-                    <p className="text-sm text-gray-400">
-                      Items: {order.items.join(", ")}
-                    </p>
-
-                    <div className="flex justify-between mt-2">
-                      <span className="font-medium text-blue-400">
-                        ₹{order.total}
-                      </span>
-
-                      <button className="text-sm text-indigo-400 hover:underline">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                    update profile
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="orders">
+          <Card>
+            <CardHeader>
+              <CardTitle>Orders</CardTitle>
+              <CardDescription>
+                View your order history and manage your past purchases.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              You have 5 orders in progress and 2 pending shipments.
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

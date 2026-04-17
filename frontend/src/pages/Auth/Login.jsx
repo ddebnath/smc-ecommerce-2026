@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,17 +14,18 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { API_URL } from "../../config/api.js";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/slices/userSlice";
 
 const Login = () => {
-  const { login, cartValue } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -43,11 +43,15 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
       });
 
-      login(res.data.user, res.data.accessToken); // pass cart value to login function
+      dispatch(setUser(res.data.user)); // Update Redux store with user data
+
+      // create a local storage for access token and user data
+      localStorage.setItem("accessToken", res.data.accessToken);
 
       toast.success(res.data.message || "Logged in successfully", {
         position: "top-center",
       });
+
       navigate("/");
     } catch (error) {
       toast.error(

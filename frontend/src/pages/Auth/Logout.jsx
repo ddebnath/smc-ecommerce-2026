@@ -1,13 +1,15 @@
 import { useEffect, useContext } from "react";
-import { AuthContext } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { API_URL } from "@/config/api";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/slices/userSlice";
 
 const Logout = () => {
-  const { accessToken, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
 
   const verifyLogout = async () => {
     try {
@@ -18,7 +20,9 @@ const Logout = () => {
       });
 
       if (res.data.success) {
-        logout(); // context logout to clear local state
+        dispatch(setUser(null));
+        localStorage.removeItem("accessToken");
+
         toast.success(res.data.message, {
           position: "top-center",
         });
@@ -26,8 +30,8 @@ const Logout = () => {
       }
     } catch (error) {
       console.error("Logout error:", error);
-      // still logout locally if API fails
-      logout();
+      dispatch(setUser(null));
+      localStorage.removeItem("accessToken");
       navigate("/", { replace: true });
     }
   };

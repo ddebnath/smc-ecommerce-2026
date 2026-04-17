@@ -5,6 +5,7 @@ import { Session } from "../models/session.models.js";
 import { User } from "../models/user.models.js";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import cloudinary from "../Utils/cloudinary.js";
 
 // The user.controllers.js file contains the controller functions for handling user-related
 // operations such as registration, email verification, re-verification, and login.
@@ -588,5 +589,102 @@ export const getUserById = async (req, res) => {
   } catch (error) {
     // Handle any errors and return a 500 Internal Server Error response
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/*
+  The updateUser function is responsible for handling the update of a user's profile information. It checks if the 
+  logged-in user is authorized to update the specified user's profile (either by being the same user or having an 
+  admin role), updates the user's information in the database, and handles profile picture uploads to Cloudinary. 
+  The function also manages existing profile pictures by deleting them from Cloudinary before uploading a new one. 
+  Finally, it returns a response indicating whether the update was successful or if any errors occurred during the 
+  process.
+*/
+export const updateUser = async (req, res) => {
+  try {
+    const currentUserId = req.params.id; // the id of the user to be updated, extracted from the URL parameters
+    const loggedInUser = req.user; // the currently authenticated user, set by the isAuthenticated middleware
+
+    // Destructure the fields that can be updated from the request body. These are the new values
+    // that the client wants to update for the user.
+    const {
+      firstName,
+      lastName,
+      password,
+      address,
+      city,
+      zipcode,
+      phoneNo,
+      role,
+    } = req.body;
+
+    // check if the logged-in user's ID matches the ID of the user to be updated or if the logged-in user has an admin role. If neither condition is true,
+    // return a 403 Forbidden response indicating that access is denied.
+
+    if (
+      loggedInUser._id.toString() !== currentUserId &&
+      loggedInUser.role !== "admin"
+    ) {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    let user = await User.findById(currentUserId); // find the user in the database by their ID
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user doesnot exists" });
+    }
+
+    // update the user's profile picture if a new image file is provided in the request. This involves uploading
+    // the new image to Cloudinary, updating the user's profilePic and profilePicPublicId fields with the new values, and deleting the old profile picture from Cloudinary if it exists.
+
+    let profilePicUrl = user.profilePic; // store the current profile picture URL
+    let profilePicPublicId = user.profilePicPublicId; // store the current profile picture public ID
+
+    const file = req.file;
+
+    if (file) {
+      if (profilePicPublicId) {
+        await cloudinary.uploader.destroy(profilePicPublicId);
+      }
+
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "profiles",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        );
+        stream.end(file.buffer);
+      });
+      profilePicUrl = uploadResult.secure_url;
+      profilePicPublicId = uploadResult.public_id;
+    }
+
+    // update the user's information with the new values provided in the request body
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.password = password || user.password;
+    user.address = address || user.address;
+    user.city = city || user.city;
+    user.zipcode = zipcode || user.zipcode;
+    user.phoneNo = phoneNo || user.phoneNo;
+    user.role = role || user.role;
+
+    user.profilePic = profilePicUrl;
+    user.profilePicPublicId = profilePicPublicId;
+
+    const updatedUser = await user.save(); // save the updated user record to the database
+
+    return res.status(200).json({
+      message: "Upload successful",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

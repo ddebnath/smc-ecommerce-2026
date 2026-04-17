@@ -1,15 +1,14 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import Logo from "./Logo";
+import { useSelector } from "react-redux";
+import store from "../../src/redux/store.js";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Placeholder for auth state
-  const [userName, setUserName] = useState("John"); // Placeholder for user name
-  const { user, accessToken, cartValue, incrementCart, decrementCart } =
-    useContext(AuthContext);
-
+  const { user } = useSelector((store) => store.user); // Access user data from Redux store
+  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
+  const cartValue = 0;
   return (
     <nav className="sticky top-0 z-50 border-b-4 border-blue-600 bg-gradient-to-r from-blue-800 to-blue-600 shadow-lg">
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
@@ -37,7 +36,7 @@ const Navbar = () => {
           {/* User Greeting and Shopping Cart */}
           <div className="flex items-center gap-6">
             {(user && (
-              <Link to="/profile">
+              <Link to={`/profile/${user._id}`}>
                 {
                   <span className="text-white">
                     Welcome, {user.firstName} {user.lastName}
@@ -51,7 +50,7 @@ const Navbar = () => {
               </Link>
             )}
 
-            {accessToken && (
+            {user && (
               <Link
                 className="text-sm font-semibold text-blue-50 transition hover:text-white hover:underline hover:underline-offset-4"
                 to="/auth/logout"

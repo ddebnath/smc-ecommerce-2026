@@ -19,7 +19,7 @@ const AppRoutes = () => {
       {/* Public Layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:userId" element={<Profile />} />
       </Route>
 
       {/* Auth Layout */}
