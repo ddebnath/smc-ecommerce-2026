@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import profilePic from "../../assets/Dipankar_Debnath.jpg";
+import profilePic from "../../assets/image_icon.png";
 import { API_URL } from "@/config/api.js";
 import {
   Card,
