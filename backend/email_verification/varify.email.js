@@ -1,18 +1,6 @@
 // import nodemailer from "nodemailer";
 // import "dotenv/config";
 
-// /*
-//   step 1: The verifyEmail function is responsible for sending an email verification link to
-//   the user's email address.
-//   step 2: It takes a token and an email address as parameters, creates a transporter object
-//   using nodemailer with Gmail service and authentication details from environment variables.
-//   step 3: It then defines the mail configurations, including the sender's email, recipient's
-//   email, subject, and the body of the email which contains a verification link with the token.
-//   step 4: Finally, it sends the email using the transporter.sendMail method and logs a success
-//   message if the email is sent successfully. If there is an error during this process, it
-//   throws an error.
-// */
-
 // export const verifyEmail = async (token, email) => {
 //   try {
 //     // Create transporter
@@ -108,6 +96,18 @@
 //     );
 //   }
 // };
+
+/*
+  step 1: The verifyEmail function is responsible for sending an email verification link to
+  the user's email address.
+  step 2: It takes a token and an email address as parameters, creates a transporter object
+  using nodemailer with Gmail service and authentication details from environment variables.
+  step 3: It then defines the mail configurations, including the sender's email, recipient's
+  email, subject, and the body of the email which contains a verification link with the token.
+  step 4: Finally, it sends the email using the transporter.sendMail method and logs a success
+  message if the email is sent successfully. If there is an error during this process, it
+  throws an error.
+*/
 
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";

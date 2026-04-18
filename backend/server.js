@@ -1,7 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./database/db.js";
-import routes from "./routes/user.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import cors from "cors";
 
 // Create an instance of the Express application
@@ -29,7 +30,8 @@ app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
-app.use("/api/v1/user", routes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/product", productRoutes);
 
 // Start the server and listen on the specified port. When the server starts, it will
 // connect to the database and log a message indicating that the server is running.
