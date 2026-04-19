@@ -7,6 +7,8 @@ import AuthLayout from "../layouts/AuthLayout";
 // Pages
 import Home from "../pages/Home/Home";
 import Profile from "../pages/profile/Profile";
+import Cart from "../pages/Cart/Cart.jsx";
+import Product from "../pages/product/Product";
 import Login from "../pages/Auth/Login";
 import Signup from "../pages/Auth/Signup";
 import Verify from "../pages/Auth/Verify";
@@ -20,6 +22,8 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/product" element={<Product />} />
+        <Route path="cart" element={<Cart />} />
       </Route>
 
       {/* Auth Layout */}

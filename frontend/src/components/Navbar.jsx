@@ -26,7 +26,7 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              to="/"
+              to="/product"
               className="text-sm font-semibold text-blue-50 transition hover:text-white hover:underline hover:underline-offset-4"
             >
               Products
@@ -59,14 +59,17 @@ const Navbar = () => {
               </Link>
             )}
             {/* Shopping Cart */}
-            <button className="relative inline-flex items-center justify-center rounded-full bg-white p-2 text-blue-600 transition hover:bg-blue-100 hover:shadow-md">
+            <Link
+              className="relative inline-flex items-center justify-center rounded-full bg-white p-2 text-blue-600 transition hover:bg-blue-100 hover:shadow-md"
+              to="/cart"
+            >
               <ShoppingCart className="h-6 w-6" />
               {cartValue >= 0 && (
                 <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-md">
                   {cartValue}
                 </span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </div>
