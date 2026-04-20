@@ -14,6 +14,17 @@ import Signup from "../pages/Auth/Signup";
 import Verify from "../pages/Auth/Verify";
 import VerifyEmail from "@/pages/Auth/VerifyEmail";
 import Logout from "@/pages/Auth/Logout";
+import Dashboard from "@/pages/Dashboard/Dashboard";
+import AdminSales from "@/pages/AdminPages/AdminSales";
+import AddProduct from "@/pages/AdminPages/AddProduct";
+import AdminProduct from "@/pages/AdminPages/AdminProduct";
+import AdminOrders from "@/pages/AdminPages/AdminOrders";
+import ShowUserOrders from "@/pages/AdminPages/ShowUserOrders";
+import AdminUsers from "@/pages/AdminPages/AdminUsers";
+import UserInfo from "@/pages/AdminPages/UserInfo";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const AppRoutes = () => {
   return (
@@ -21,9 +32,23 @@ const AppRoutes = () => {
       {/* Public Layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/profile/:userId" element={<Profile />} />
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/product" element={<Product />} />
-        <Route path="cart" element={<Cart />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Auth Layout */}
@@ -33,6 +58,24 @@ const AppRoutes = () => {
         <Route path="signup" element={<Signup />} />
         <Route path="verify" element={<Verify />} />
         <Route path="verify/:token" element={<VerifyEmail />} />
+      </Route>
+
+      {/* Admin Dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute adminOnly={true}>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="sales" element={<AdminSales />} />
+        <Route path="add-product" element={<AddProduct />} />
+        <Route path="products" element={<AdminProduct />} />
+        <Route path="orders" element={<AdminOrders />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="users/:id" element={<UserInfo />} />
+        <Route path="users/orders/:userId" element={<ShowUserOrders />} />
       </Route>
     </Routes>
   );

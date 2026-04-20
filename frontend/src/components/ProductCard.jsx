@@ -5,17 +5,23 @@ import { Skeleton } from "./ui/skeleton";
 import axios from "axios";
 import { API_URL } from "@/config/api.js";
 import { toast } from "sonner";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useNavigate } from "react-router-dom";
 import { setCart } from "@/redux/slices/productSlice.js";
+import store from "@/redux/store";
 
 const ProductCard = ({ product, loading }) => {
+  const { user } = useSelector((store) => store.user);
   const { productImg, productPrice, productName } = product;
   const accessToken = localStorage.getItem("accessToken");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const addToCart = async (productId) => {
+    if (!user) {
+      toast.success("login to add products to the Cart");
+    }
+
     try {
       const res = await axios.post(
         `${API_URL}/cart/add`,

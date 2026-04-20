@@ -8,6 +8,7 @@ import store from "../../src/redux/store.js";
 const Navbar = () => {
   const { user } = useSelector((store) => store.user); // Access user data from Redux store
   const { cart } = useSelector((store) => store.product);
+  const admin = user?.role === "admin" ? true : false;
   //  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
   // calculating to number of items in the cart store
   const totalNumberOfItems = cart.items.reduce(
@@ -55,10 +56,14 @@ const Navbar = () => {
                 <span>Login</span>{" "}
               </Link>
             )}
-
+            {admin && (
+              <Link to={`/dashboard`}>
+                {<span className="text-white">Dashboard</span>}
+              </Link>
+            )}
             {user && (
               <Link
-                className="text-sm font-semibold text-blue-50 transition hover:text-white hover:underline hover:underline-offset-4"
+                className=" text-white transition hover:text-white hover:underline hover:underline-offset-4"
                 to="/auth/logout"
               >
                 Logout
