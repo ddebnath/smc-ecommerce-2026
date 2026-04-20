@@ -2,9 +2,36 @@ import React from "react";
 import { Button } from "./ui/button";
 import { ShoppingCart } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import axios from "axios";
+import { API_URL } from "@/config/api.js";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setCart } from "@/redux/slices/productSlice.js";
 
 const ProductCard = ({ product, loading }) => {
   const { productImg, productPrice, productName } = product;
+  const accessToken = localStorage.getItem("accessToken");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const addToCart = async (productId) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}/cart/add`,
+        { productId },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      if (res.data.success) {
+        toast.success("product added to cart");
+        dispatch(setCart(res.data.cart));
+      }
+    } catch (error) {
+      console.log("Error : ", error);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden h-max">
       <div className="w-full h-full aspect-square overflow-hidden">
@@ -34,6 +61,9 @@ const ProductCard = ({ product, loading }) => {
             className="bg-blue-600 mb-3 w-full"
             text="text-white"
             hover="hover:bg-blue-600"
+            onClick={() => {
+              addToCart(product._id);
+            }}
           >
             <ShoppingCart />
             Add to card

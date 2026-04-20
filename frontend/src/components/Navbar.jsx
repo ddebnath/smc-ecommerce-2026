@@ -7,8 +7,14 @@ import store from "../../src/redux/store.js";
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.user); // Access user data from Redux store
-  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
-  const cartValue = 0;
+  const { cart } = useSelector((store) => store.product);
+  //  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
+  // calculating to number of items in the cart store
+  const totalNumberOfItems = cart.items.reduce(
+    (acc, item) => acc + item.quantity,
+    0,
+  );
+
   return (
     <nav className="sticky top-0 z-50 border-b-4 border-blue-600 bg-gradient-to-r from-blue-800 to-blue-600 shadow-lg">
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
@@ -64,11 +70,9 @@ const Navbar = () => {
               to="/cart"
             >
               <ShoppingCart className="h-6 w-6" />
-              {cartValue >= 0 && (
-                <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-md">
-                  {cartValue}
-                </span>
-              )}
+              <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-md">
+                {totalNumberOfItems || 0}
+              </span>
             </Link>
           </div>
         </div>
