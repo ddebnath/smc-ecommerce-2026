@@ -11,10 +11,11 @@ const Navbar = () => {
   const admin = user?.role === "admin" ? true : false;
   //  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
   // calculating to number of items in the cart store
-  const totalNumberOfItems =
-    cart?.items && Array.isArray(cart.items)
+  const totalNumberOfItems = user
+    ? cart?.items && Array.isArray(cart.items)
       ? cart.items.reduce((acc, item) => acc + item.quantity, 0)
-      : 0;
+      : 0
+    : 0;
 
   return (
     <nav className="sticky top-0 z-50 border-b-4 border-blue-600 bg-gradient-to-r from-blue-800 to-blue-600 shadow-lg">
