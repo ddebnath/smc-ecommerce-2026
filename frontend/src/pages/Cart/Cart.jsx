@@ -99,7 +99,7 @@ const Cart = () => {
 
             <div className="grid gap-6 lg:grid-cols-[1.8fr_0.9fr]">
               <section className="space-y-4">
-                {cart.items.map((product, index) => {
+                {cart?.items?.map((product, index) => {
                   const imageUrl = product?.productId?.productImg?.[0]?.url;
                   const name = product?.productId?.productName;
                   const price = product?.productId?.productPrice || 0;
