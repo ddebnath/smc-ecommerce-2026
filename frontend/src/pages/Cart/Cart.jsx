@@ -60,16 +60,19 @@ const Cart = () => {
     }
   };
 
-  const totalItems = cart?.items?.reduce(
-    (acc, item) => acc + (item?.quantity ?? 0),
-    0,
-  );
+  const totalItems =
+    cart?.items && Array.isArray(cart.items)
+      ? cart.items.reduce((acc, item) => acc + (item?.quantity ?? 0), 0)
+      : 0;
 
-  const subtotal = cart?.items?.reduce(
-    (acc, item) =>
-      acc + (item?.quantity ?? 0) * (item?.productId?.productPrice ?? 0),
-    0,
-  );
+  const subtotal =
+    cart?.items && Array.isArray(cart.items)
+      ? cart.items.reduce(
+          (acc, item) =>
+            acc + (item?.quantity ?? 0) * (item?.productId?.productPrice ?? 0),
+          0,
+        )
+      : 0;
 
   useEffect(() => {
     loadCart();
