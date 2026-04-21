@@ -11,10 +11,13 @@ const Navbar = () => {
   const admin = user?.role === "admin" ? true : false;
   //  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
   // calculating to number of items in the cart store
+  // const totalNumberOfItems = user
+  //   ? cart?.items && Array.isArray(cart.items)
+  //     ? cart.items.reduce((acc, item) => acc + item.quantity, 0)
+  //     : 0
+  //   : 0;
   const totalNumberOfItems = user
-    ? cart?.items && Array.isArray(cart.items)
-      ? cart.items.reduce((acc, item) => acc + item.quantity, 0)
-      : 0
+    ? (cart?.items || []).reduce((acc, item) => acc + (item?.quantity ?? 0), 0)
     : 0;
 
   return (
