@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const products = [
   "https://images.unsplash.com/photo-1509440159596-0249088772ff", // bread
@@ -31,7 +32,10 @@ export default function Hero() {
         </p>
 
         <div className="flex gap-3">
-          <Button size="lg">Shop Now</Button>
+          <Link to="/product">
+            <Button size="lg">Shop Now</Button>
+          </Link>
+
           <Button variant="outline" size="lg">
             Explore
           </Button>
