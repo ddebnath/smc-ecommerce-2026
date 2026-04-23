@@ -2,7 +2,7 @@ import logo from "@/assets/college_logo.png"; // update path
 
 const Logo = () => {
   return (
-    <div className="flex justify-items-stretch gap-3 cursor-pointer group">
+    <div className="flex items-center justify-center gap-3 cursor-pointer group py-3">
       {/* Logo Image */}
       <img
         src={logo}
@@ -11,7 +11,7 @@ const Logo = () => {
       />
 
       {/* Brand Name */}
-      <h1 className="text-xl font-semibold text-gray-800 transition group-hover:text-purple-600">
+      <h1 className="text-2xl font-semibold text-gray-800 transition group-hover:text-purple-600">
         Saint Mary's College Online Store
       </h1>
     </div>
