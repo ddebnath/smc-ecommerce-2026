@@ -2,6 +2,7 @@ import FilterSideBar from "@/components/FilterSideBar";
 import React, { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { API_URL } from "@/config/api.js";
+import { Loader2 } from "lucide-react";
 
 import {
   Select,
@@ -126,8 +127,9 @@ const Product = () => {
           <div className="flex-1">
             {/* Loading */}
             {loading && (
-              <div className="text-center py-20 text-gray-500">
-                Loading products...
+              <div className="flex flex-col items-center justify-center py-24 gap-4">
+                <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+                <p className="text-gray-600 text-sm">Fetching products...</p>
               </div>
             )}
 
