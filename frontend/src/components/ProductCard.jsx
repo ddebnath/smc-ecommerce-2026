@@ -19,7 +19,9 @@ const ProductCard = ({ product, loading }) => {
 
   const addToCart = async (productId) => {
     if (!user) {
-      toast.success("login to add products to the Cart");
+      toast.success("login to add products to the Cart", {
+        position: "top-center",
+      });
     }
 
     try {

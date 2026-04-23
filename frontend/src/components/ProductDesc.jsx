@@ -25,6 +25,9 @@ const ProductDesc = ({ product }) => {
       }
     } catch (error) {
       console.log("Product Description Page : ", error);
+      toast.success("login to add products to the cart", {
+        position: "top-center",
+      });
     }
   };
   return (

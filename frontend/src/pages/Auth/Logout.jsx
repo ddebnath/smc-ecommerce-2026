@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import axios from "axios";
 import { API_URL } from "@/config/api";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Logout = () => {
   const navigate = useNavigate();
@@ -23,11 +23,7 @@ const Logout = () => {
       if (res.data.success) {
         dispatch(setUser(null));
         localStorage.removeItem("accessToken");
-
-        toast.success(res.data.message, {
-          position: "top-center",
-        });
-
+        toast.success(res.data.message);
         navigate("/", { replace: true });
       }
     } catch (error) {
