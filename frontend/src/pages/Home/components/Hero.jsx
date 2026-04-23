@@ -32,10 +32,9 @@ export default function Hero() {
         </p>
 
         <div className="flex gap-3">
-          <Link to="/product">
-            <Button size="lg">Shop Now</Button>
-          </Link>
-
+          <Button variant="outline" size="lg">
+            Shop Now
+          </Button>
           <Button variant="outline" size="lg">
             Explore
           </Button>

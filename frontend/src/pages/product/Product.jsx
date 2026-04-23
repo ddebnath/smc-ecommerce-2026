@@ -33,6 +33,7 @@ const Product = () => {
       const res = await axios.get(`${API_URL}/product/getAllProducts`);
       if (res.data.success) {
         setAllProducts(res.data.products);
+        toast.success(res.data.message);
         dispatch(setProducts(res.data.products));
       }
     } catch (error) {
