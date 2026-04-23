@@ -37,6 +37,10 @@ export const addProduct = async (req, res) => {
           url: result.secure_url,
         });
       }
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "At least 1 image is required" });
     }
 
     // create a product in DB

@@ -1,7 +1,9 @@
 import React from "react";
 
 const AdminSales = () => {
-  return <div>AdminSales</div>;
+  return;
+
+  <></>;
 };
 
 export default AdminSales;
