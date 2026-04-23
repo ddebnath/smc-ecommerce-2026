@@ -1,15 +1,16 @@
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { API_URL } from "@/config/api";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
+import { Loader2 } from "lucide-react";
 
 const Logout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const accessToken = localStorage.getItem("accessToken"); // Get access token from local storage
+  const accessToken = localStorage.getItem("accessToken");
 
   const verifyLogout = async () => {
     try {
@@ -26,6 +27,7 @@ const Logout = () => {
         toast.success(res.data.message, {
           position: "top-center",
         });
+
         navigate("/", { replace: true });
       }
     } catch (error) {
@@ -40,7 +42,12 @@ const Logout = () => {
     verifyLogout();
   }, []);
 
-  return <p className="text-center mt-10">Logging out...</p>;
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <p className="text-gray-600 text-sm">Logging you out...</p>
+    </div>
+  );
 };
 
 export default Logout;
