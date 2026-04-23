@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import Logo from "./Logo";
@@ -16,6 +16,7 @@ const Navbar = () => {
   //     ? cart.items.reduce((acc, item) => acc + item.quantity, 0)
   //     : 0
   //   : 0;
+
   const totalNumberOfItems = user
     ? (cart?.items || []).reduce((acc, item) => acc + (item?.quantity ?? 0), 0)
     : 0;

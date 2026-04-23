@@ -25,6 +25,7 @@ import UserInfo from "@/pages/AdminPages/UserInfo";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SingleProduct from "@/pages/product/SingleProduct";
 
 const AppRoutes = () => {
   return (
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       {/* Public Layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+
         <Route
           path="/profile/:userId"
           element={
@@ -40,7 +42,10 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+
         <Route path="/product" element={<Product />} />
+        <Route path="/product/:id" element={<SingleProduct />} />
+
         <Route
           path="/cart"
           element={
