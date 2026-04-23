@@ -85,81 +85,87 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="pl-[350px] py-10 pr-20 px-4 mx-auto mt-20 bg-grey-100">
-      <Card className="w-full my-20">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
+      <Card className="w-full max-w-3xl shadow-xl rounded-2xl">
         <form onSubmit={handleSubmit}>
-          <CardHeader>
-            <CardTitle>Add Product</CardTitle>
-            <CardDescription>Enter Product details below</CardDescription>
+          <CardHeader className="text-center space-y-1">
+            <CardTitle className="text-2xl font-bold">Add Product</CardTitle>
+            <CardDescription className="text-gray-500">
+              Enter product details below
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
-            <div className="flex flex-col gap-4">
+            <div className="grid md:grid-cols-2 gap-5">
               {/* Product Name */}
-              <div className="grid gap-2">
-                <Label>Product Name</Label>
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm font-medium">Product Name</Label>
                 <Input
                   type="text"
                   name="productName"
                   placeholder="Mobile"
                   value={productData.productName}
                   onChange={handleChange}
+                  className="focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
               {/* Price */}
-              <div className="grid gap-2">
-                <Label>Price</Label>
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm font-medium">Price</Label>
                 <Input
                   type="number"
                   name="productPrice"
                   placeholder="₹1000"
                   value={productData.productPrice}
                   onChange={handleChange}
+                  className="focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
               {/* Brand */}
-              <div className="grid gap-2">
-                <Label>Brand</Label>
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm font-medium">Brand</Label>
                 <Input
                   type="text"
                   name="brand"
                   placeholder="Apple / Samsung"
                   value={productData.brand}
                   onChange={handleChange}
+                  className="focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               {/* Category */}
-              <div className="grid gap-2">
-                <Label>Category</Label>
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm font-medium">Category</Label>
                 <Input
                   type="text"
                   name="category"
                   placeholder="Electronics"
                   value={productData.category}
                   onChange={handleChange}
+                  className="focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              {/* Description */}
-              <div className="grid gap-2">
-                <Label>Description</Label>
+              {/* Description (full width) */}
+              <div className="md:col-span-2 flex flex-col gap-1">
+                <Label className="text-sm font-medium">Description</Label>
                 <textarea
                   name="productDesc"
-                  rows="5"
-                  className="border rounded-md p-2"
+                  rows="4"
+                  className="border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   placeholder="Enter product description..."
                   value={productData.productDesc}
                   onChange={handleChange}
                 />
               </div>
 
-              {/* Image Upload */}
-              <div className="grid gap-2">
+              {/* Image Upload (full width) */}
+              <div className="md:col-span-2">
                 <ImageUpload
                   productData={productData}
                   setProductData={setProductData}
@@ -168,17 +174,17 @@ const AddProduct = () => {
             </div>
           </CardContent>
 
-          <CardFooter className="flex-col gap-2">
+          <CardFooter className="flex justify-center">
             <Button
-              className="bg-blue-600 cursor-pointer w-full"
               type="submit"
-              onClick={handleSubmit}
               disabled={loading}
+              className="w-full md:w-1/2 bg-blue-600 hover:bg-blue-700 transition-all duration-200 rounded-lg text-white font-medium py-2 flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="flex gap-1 items-center">
-                  <Loader2 className="animate-spin"> please wait...</Loader2>
-                </span>
+                <>
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  Please wait...
+                </>
               ) : (
                 "Add Product"
               )}

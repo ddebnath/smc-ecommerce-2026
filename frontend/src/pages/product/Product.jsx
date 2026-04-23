@@ -82,46 +82,70 @@ const Product = () => {
   }, [search, category, brand, sortOrder, allProducts]);
 
   return (
-    <div className="pt-10 pb-5">
-      <div className="flex gap-7 max-w-[90%] mx-auto px-2 sm:px-6 lg:px-8">
-        {/* sidebar */}
-        <FilterSideBar
-          allProducts={allProducts}
-          search={search}
-          setSearch={setSearch}
-          brand={brand}
-          setBrand={setBrand}
-          category={category}
-          setCategory={setCategory}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
-        {/* low to high */}
-        <div className="flex flex-col flex-1">
-          <div className="flex justify-end mb-4">
-            <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger className="w-full max-w-60">
-                <SelectValue placeholder="Sort by Price" />
-              </SelectTrigger>
+    <div className="bg-gray-50 min-h-screen pt-20 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+          <h1 className="text-2xl font-semibold text-gray-800">Products</h1>
 
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="ALL">ALL</SelectItem>
-                  <SelectItem value="lowToHigh">Price: Low to High</SelectItem>
-                  <SelectItem value="highToLow">Price: High to Low</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>{" "}
+          {/* Sort */}
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger className="w-full sm:w-60 bg-white shadow-sm">
+              <SelectValue placeholder="Sort by Price" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="ALL">All</SelectItem>
+                <SelectItem value="lowToHigh">Price: Low to High</SelectItem>
+                <SelectItem value="highToLow">Price: High to Low</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <div className="hidden md:block w-72">
+            <div className="sticky top-24 bg-white p-4 rounded-xl shadow-sm">
+              <FilterSideBar
+                allProducts={allProducts}
+                search={search}
+                setSearch={setSearch}
+                brand={brand}
+                setBrand={setBrand}
+                category={category}
+                setCategory={setCategory}
+                sortOrder={sortOrder}
+                setSortOrder={setSortOrder}
+              />
+            </div>
           </div>
 
-          {/* product card section */}
-          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products &&
-              products.map((product) => (
-                <div key={product._id}>
-                  <ProductCard product={product} loading={loading} />
-                </div>
-              ))}
+          {/* Products */}
+          <div className="flex-1">
+            {/* Loading */}
+            {loading && (
+              <div className="text-center py-20 text-gray-500">
+                Loading products...
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && products.length === 0 && (
+              <div className="text-center py-20 text-gray-500">
+                No products found 😕
+              </div>
+            )}
+
+            {/* Grid */}
+            {!loading && products.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

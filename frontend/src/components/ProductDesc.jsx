@@ -45,7 +45,14 @@ const ProductDesc = ({ product }) => {
 
       <div className="flex gap-2 items-center w-[300px]">
         <p className="text-grey-500 font-semibold">Quantity : </p>
-        <Input type="number" className="w-15" defaultValue={1} />
+        <Input
+          type="number"
+          className="w-15"
+          defaultValue={1}
+          onChange={(e) => {
+            if (e.target.value < 1) e.target.value = 1;
+          }}
+        />
       </div>
 
       <Button

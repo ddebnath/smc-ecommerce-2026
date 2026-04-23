@@ -37,7 +37,7 @@ const Cart = () => {
 
       if (res.data.success) {
         dispatch(setCart(res.data.cart));
-        toast.success("product has been removed");
+        toast.success("product has been removed from cart");
       }
     } catch (error) {
       console.log("remove item error : ", error);
