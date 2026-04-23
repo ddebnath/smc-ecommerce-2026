@@ -64,84 +64,103 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-blue-100 px-4 py-10 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/40 sm:max-w-2xl">
-        <CardHeader className="border-b border-slate-200 px-6 py-6 text-center sm:px-8">
-          <CardTitle className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-            Sign in to your account
-          </CardTitle>
-        </CardHeader>
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gradient-to-br from-blue-100 via-white to-blue-50">
+      {/* LEFT SIDE (Brand / Image) */}
+      <div className="hidden lg:flex flex-col justify-center items-center px-12 bg-blue-600 text-white relative overflow-hidden">
+        <h1 className="text-4xl font-bold mb-4">Welcome Back 👋</h1>
+        <p className="text-lg text-blue-100 text-center max-w-md">
+          Sign in to access your account and discover the best products tailored
+          for you.
+        </p>
 
-        <CardContent className="px-6 py-6 sm:px-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-              />
-            </div>
+        {/* subtle background circle */}
+        <div className="absolute w-72 h-72 bg-white/10 rounded-full top-10 left-10 blur-2xl"></div>
+        <div className="absolute w-72 h-72 bg-white/10 rounded-full bottom-10 right-10 blur-2xl"></div>
+      </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
+      {/* RIGHT SIDE (Form) */}
+      <div className="flex items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md shadow-xl border-0 rounded-2xl">
+          <CardHeader className="text-center space-y-1 pb-2">
+            <CardTitle className="text-2xl font-bold text-gray-800">
+              Sign in
+            </CardTitle>
+            <p className="text-sm text-gray-500">
+              Enter your credentials to continue
+            </p>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email */}
+              <div className="flex flex-col gap-1">
+                <Label>Email</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  placeholder="Enter your password"
-                  className="pr-10"
+                  placeholder="you@example.com"
+                  className="focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-2 inline-flex items-center rounded px-2 text-slate-500 transition hover:text-slate-900"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
               </div>
-            </div>
 
-            <CardFooter className="px-0 py-0">
+              {/* Password */}
+              <div className="flex flex-col gap-1">
+                <Label>Password</Label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    className="pr-10 focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-800"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit */}
               <Button
                 type="submit"
-                className="w-full rounded-full"
                 disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 transition"
               >
                 {loading ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin h-4 w-4" />
                     Signing in...
                   </span>
                 ) : (
                   "Sign In"
                 )}
               </Button>
-            </CardFooter>
-          </form>
-        </CardContent>
+            </form>
+          </CardContent>
 
-        <div className="border-t border-slate-200 px-6 py-6 sm:px-8">
-          <p className="text-center text-sm text-slate-600">
-            Don&apos;t have an account?{" "}
-            <Link
-              to="/auth/signup"
-              className="font-semibold text-slate-900 hover:text-slate-700"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </Card>
+          {/* Footer */}
+          <CardFooter className="flex flex-col gap-3 text-center text-sm text-gray-600">
+            <p>
+              Don’t have an account?{" "}
+              <Link
+                to="/auth/signup"
+                className="font-medium text-blue-600 hover:underline"
+              >
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 };
