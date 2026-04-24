@@ -8,4 +8,7 @@ export const singleUpload = multer({ storage }).single("file");
 
 // multiple file upload
 
-export const multipleUpload = multer({ storage }).array("files", 5);
+export const multipleUpload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).array("files", 5);

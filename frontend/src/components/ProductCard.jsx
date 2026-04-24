@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { ShoppingCart } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
@@ -6,78 +6,102 @@ import axios from "axios";
 import { API_URL } from "@/config/api.js";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { setCart } from "@/redux/slices/productSlice.js";
-import store from "@/redux/store";
 
-const ProductCard = ({ product, loading }) => {
-  const { user } = useSelector((store) => store.user);
-  const { productImg, productPrice, productName } = product;
-  const accessToken = localStorage.getItem("accessToken");
+const ProductCard = ({ product = {}, loading }) => {
+  const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const addToCart = async (productId) => {
+  const [adding, setAdding] = useState(false);
+
+  const accessToken = localStorage.getItem("accessToken");
+
+  const {
+    _id,
+    productImg = [],
+    productPrice = 0,
+    productName = "No Name",
+  } = product;
+
+  const imageUrl =
+    productImg?.[0]?.url || "https://via.placeholder.com/300x300?text=No+Image";
+
+  const addToCart = async () => {
     if (!user) {
-      toast.success("login to add products to the Cart", {
-        position: "top-center",
-      });
+      toast.error("Please login to add products to cart");
+      return; // ❗ stop execution
     }
 
     try {
+      setAdding(true);
+
       const res = await axios.post(
         `${API_URL}/cart/add`,
-        { productId },
-        { headers: { Authorization: `Bearer ${accessToken}` } },
+        { productId: _id },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
       );
 
       if (res.data.success) {
-        toast.success("product added to cart");
+        toast.success("Product added to cart");
         dispatch(setCart(res.data.cart));
       }
     } catch (error) {
-      console.log("Error : ", error);
+      toast.error(error?.response?.data?.message || "Failed to add to cart");
+    } finally {
+      setAdding(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden h-max">
-      <div className="w-full h-full aspect-square overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+      {/* Image */}
+      <div className="aspect-square overflow-hidden">
         {loading ? (
-          <Skeleton className="w-full h-full rounded-lg" />
+          <Skeleton className="w-full h-full" />
         ) : (
           <img
-            src={productImg[0]?.url}
-            alt=""
-            className="w-full h-full transition-transform duration-300 hover:scale-105"
-            onClick={() => {
-              navigate(`/product/${product._id}`);
-            }}
+            src={imageUrl}
+            alt={productName}
+            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+            onClick={() => navigate(`/product/${_id}`)}
           />
         )}
       </div>
+
+      {/* Content */}
       {loading ? (
-        <div className="px-2 space-y-2 my-2">
-          <Skeleton className="w-[200px] h-4" />
-          <Skeleton className="w-[100px] h-4" />
-          <Skeleton className="w-[150px] h-8" />
+        <div className="p-3 space-y-2">
+          <Skeleton className="w-full h-4" />
+          <Skeleton className="w-1/2 h-4" />
+          <Skeleton className="w-full h-8" />
         </div>
       ) : (
-        <div className="p-2 space-y-2 my-2">
-          <h1 className="mx-2 font-semibold h-12 line-clamp-2 text-gray-500">
+        <div className="p-3 space-y-2">
+          <h1 className="text-sm font-medium line-clamp-2 text-gray-700 min-h-[40px]">
             {productName}
           </h1>
-          <h2 className="mx-2 font-bold">₹. {productPrice}</h2>
+
+          <h2 className="font-semibold text-lg text-gray-900">
+            ₹ {productPrice}
+          </h2>
+
           <Button
-            className="bg-blue-600 mb-3 w-full"
-            text="text-white"
-            hover="hover:bg-blue-600"
-            onClick={() => {
-              addToCart(product._id);
-            }}
+            disabled={adding}
+            onClick={addToCart}
+            className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
           >
-            <ShoppingCart />
-            Add to card
+            {adding ? (
+              "Adding..."
+            ) : (
+              <>
+                <ShoppingCart size={18} />
+                Add to Cart
+              </>
+            )}
           </Button>
         </div>
       )}

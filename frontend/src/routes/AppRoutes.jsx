@@ -26,6 +26,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SingleProduct from "@/pages/product/SingleProduct";
+import EditProduct from "@/pages/Dashboard/EditProductDialog";
 
 const AppRoutes = () => {
   return (

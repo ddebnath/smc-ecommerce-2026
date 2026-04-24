@@ -19,8 +19,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCart, setProducts } from "@/redux/slices/productSlice";
 import { Loader2, SpaceIcon } from "lucide-react";
 import store from "@/redux/store";
+import { useNavigate } from "react-router-dom";
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   const [productData, setProductData] = useState({
     productName: "",
     productPrice: "",
@@ -73,6 +75,8 @@ const AddProduct = () => {
       if (res.data.success) {
         toast.success("product added successfully");
         dispatch(setProducts([...products, res.data.product]));
+        navigate("/product");
+
         // console.log("All Products: ", products);
       }
     } catch (error) {
