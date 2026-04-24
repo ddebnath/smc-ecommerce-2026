@@ -202,9 +202,6 @@ const EditProductDialog = ({ open, setOpen, product }) => {
         );
         dispatch(setProducts(updatedProducts));
       }
-      // ✅ update redux store
-      // dispatch(removeProduct(product._id));
-
       setOpen(false);
     } catch (error) {
       console.error("Delete failed:", error);

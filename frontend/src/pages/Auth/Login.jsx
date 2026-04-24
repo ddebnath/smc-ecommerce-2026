@@ -47,9 +47,7 @@ const Login = () => {
 
       // create a local storage for access token and user data
       localStorage.setItem("accessToken", res.data.accessToken);
-
       toast.success(res.data.message || "Logged in successfully");
-
       navigate("/");
     } catch (error) {
       toast.error(

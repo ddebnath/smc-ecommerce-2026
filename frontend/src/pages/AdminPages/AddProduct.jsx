@@ -75,7 +75,7 @@ const AddProduct = () => {
       if (res.data.success) {
         toast.success("product added successfully");
         dispatch(setProducts([...products, res.data.product]));
-        navigate("/product");
+        navigate("/dashboard/sales");
 
         // console.log("All Products: ", products);
       }

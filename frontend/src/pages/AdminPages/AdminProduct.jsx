@@ -10,15 +10,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Card } from "@/components/ui/card";
 import EditProductDialog from "../Dashboard/EditProductDialog";
+import axios from "axios";
+import store from "@/redux/store.js";
+import { toast } from "sonner";
+import { API_URL } from "@/config/api";
+import { setProducts } from "@/redux/slices/productSlice";
 
 const AdminProduct = () => {
   const { products } = useSelector((store) => store.product);
-
-  const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const accessToken = localStorage.getItem("accessToken");
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async (product) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setLoading(true);
+
+      const remainingProducts = products.filter((p) => p._id !== product._id);
+
+      const res = await axios.delete(
+        `${API_URL}/product/delete/${product._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      if (res.data.success) {
+        toast.success(res.data.message);
+        dispatch(setProducts(remainingProducts));
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="pl-[350px] py-20 pr-20 flex flex-col gap-3 min-h-screen bg-gray-100">
@@ -79,7 +118,9 @@ const AdminProduct = () => {
                   <Edit2 className="text-green-500" />
                 </Button>
 
-                <Trash2 className="text-red-500 cursor-pointer" />
+                <Button variant="outline" onClick={() => handleDelete(product)}>
+                  <Trash2 className="text-red-500 cursor-pointer" />
+                </Button>
               </div>
             </div>
           </Card>
