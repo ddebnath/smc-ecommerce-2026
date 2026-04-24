@@ -26,6 +26,27 @@ const AdminProduct = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+
+  let filteredProducts = products.filter(
+    (p) =>
+      p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  if (sortOrder === "lowToHigh") {
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => a.productPrice - b.productPrice,
+    );
+  }
+
+  if (sortOrder === "highToLow") {
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => b.productPrice - a.productPrice,
+    );
+  }
 
   const handleDelete = async (product) => {
     const confirmDelete = window.confirm(
@@ -67,12 +88,14 @@ const AdminProduct = () => {
           <Input
             type="text"
             placeholder="search product..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-[400px] h-[40px]"
           />
           <Search className="absolute right-3 top-2 text-gray-400" />
         </div>
 
-        <Select>
+        <Select onValueChange={(value) => setSortOrder(value)}>
           <SelectTrigger className="w-full max-w-60">
             <SelectValue placeholder="Sort by Price" />
           </SelectTrigger>
@@ -88,7 +111,7 @@ const AdminProduct = () => {
 
       {/* Product list */}
       <div className="mt-10">
-        {products?.map((product) => (
+        {filteredProducts?.map((product) => (
           <Card key={product._id} className="px-4 mt-2">
             <div className="flex justify-between items-center">
               <div className="flex gap-2 items-center">
