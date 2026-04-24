@@ -139,36 +139,56 @@ export const updateQuantity = async (req, res) => {
 /*
     remove item from cart
 */
+
 export const removeFromCart = async (req, res) => {
   try {
     const userId = req.id;
-
     const { productId } = req.body;
 
-    let cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      return res
-        .status(400)
-        .json({ success: false, message: "cart not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
     }
 
+    // Remove the item
     cart.items = cart.items.filter(
       (item) => item.productId.toString() !== productId,
     );
 
+    // 👉 If no items left, delete the cart
+    if (cart.items.length === 0) {
+      await cart.deleteOne();
+
+      return res.status(200).json({
+        success: true,
+        message: "Cart deleted (no items left)",
+        cart: null,
+      });
+    }
+
+    // Recalculate total price
     cart.totalPrice = cart.items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
+      (total, item) => total + item.price * item.quantity,
       0,
     );
 
-    cart = await cart.populate("items.productId");
+    // Populate and save
+    await cart.populate("items.productId");
     await cart.save();
 
-    return res
-      .status(200)
-      .json({ success: true, message: "item removed successfully", cart });
+    return res.status(200).json({
+      success: true,
+      message: "Item removed successfully",
+      cart,
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
