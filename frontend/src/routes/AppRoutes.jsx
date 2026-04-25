@@ -27,6 +27,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SingleProduct from "@/pages/product/SingleProduct";
 import EditProduct from "@/pages/Dashboard/EditProductDialog";
+import AddressForm from "@/pages/AddressForm";
 
 const AppRoutes = () => {
   return (
@@ -52,6 +53,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/address"
+          element={
+            <ProtectedRoute>
+              <AddressForm />
             </ProtectedRoute>
           }
         />

@@ -216,7 +216,10 @@ const Cart = () => {
                       </div>
                     </div>
 
-                    <Button className="w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-white hover:bg-primary/90">
+                    <Button
+                      onClick={() => navigate("/address")}
+                      className="w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-white hover:bg-primary/90"
+                    >
                       Proceed to Checkout
                     </Button>
                     <div className="flex justify-center items-center">

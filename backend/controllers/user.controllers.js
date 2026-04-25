@@ -681,10 +681,41 @@ export const updateUser = async (req, res) => {
     const updatedUser = await user.save(); // save the updated user record to the database
 
     return res.status(200).json({
+      success: true,
       message: "Upload successful",
       user: updatedUser,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+/*
+get current user
+*/
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // from token
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.log("getCurrentUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
