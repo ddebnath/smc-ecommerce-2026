@@ -29,13 +29,13 @@ const AddressForm = () => {
 
   // auto show form if empty
   useEffect(() => {
-    if (addresses.length === 0) {
+    if (addresses?.length === 0) {
       setShowForm(true);
     }
   }, [addresses]);
 
   useEffect(() => {
-    if (addresses.length > 0 && selectedAddress === null) {
+    if (addresses?.length > 0 && selectedAddress === null) {
       dispatch(setSelectedAddress(0)); // ✅ select first address
     }
   }, [addresses, selectedAddress]);
@@ -92,7 +92,7 @@ const AddressForm = () => {
         </h2>
 
         {/* ================= ADDRESS LIST ================= */}
-        {addresses.length > 0 && !showForm && (
+        {addresses?.length > 0 && !showForm && (
           <div className="space-y-4 ml mb-6">
             <h3 className="text-lg font-semibold">Saved Addresses</h3>
 
@@ -234,7 +234,7 @@ const AddressForm = () => {
                 Save Address & Continue
               </button>
 
-              {addresses.length > 0 && (
+              {addresses?.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
@@ -271,7 +271,7 @@ const AddressForm = () => {
         {/* Total */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-lg font-medium">Total Number of Items</span>
-          <span className="text-lg font-bold">₹ {cart.items.length}</span>
+          <span className="text-lg font-bold">₹ {cart?.items?.length}</span>
         </div>
         <div className="flex justify-between items-center mb-4">
           <span className="text-lg font-medium">Total Price</span>
