@@ -29,6 +29,7 @@ import SingleProduct from "@/pages/product/SingleProduct";
 import EditProduct from "@/pages/Dashboard/EditProductDialog";
 // import AddressForm from "@/pages/AddressForm";
 import DeveleryAddress from "@/pages/DeleveryAddress";
+import PaymentSuccessful from "@/pages/PaymentSuccessful";
 
 const AppRoutes = () => {
   return (
@@ -70,6 +71,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <DeveleryAddress />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-success"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccessful />
             </ProtectedRoute>
           }
         />

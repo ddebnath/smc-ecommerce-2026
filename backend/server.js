@@ -5,6 +5,7 @@ import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import deleveryRoutes from "./routes/deleveryAddress.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 import cors from "cors";
 
 // Create an instance of the Express application
@@ -36,6 +37,8 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/address", deleveryRoutes);
+app.use("/api/v1/orders", orderRoutes);
+
 // Start the server and listen on the specified port. When the server starts, it will
 // connect to the database and log a message indicating that the server is running.
 // The PORT is typically defined in the .env file, and connectDB is a function that

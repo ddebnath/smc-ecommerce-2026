@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { API_URL } from "@/config/api.js";
-import { useSelector } from "react-redux";
+import { API_URL, RAZORPAY_KEY_ID } from "@/config/api.js";
+
+import { useDispatch, useSelector } from "react-redux";
 import store from "@/redux/store";
+import { toast } from "sonner";
+import { setCart } from "@/redux/slices/productSlice";
+import { useNavigate } from "react-router-dom";
 
 const DeliveryAddress = () => {
   const accessToken = localStorage.getItem("accessToken");
@@ -11,6 +15,8 @@ const DeliveryAddress = () => {
   const [selectedIndex, setSelectedIndex] = useState(undefined);
   const [showForm, setShowForm] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -134,6 +140,99 @@ const DeliveryAddress = () => {
   const totalPrice = cart?.totalPrice;
   const deleveryCharge = totalPrice >= 500 ? 0 : 50;
   const totalPayable = totalPrice + deleveryCharge;
+  const tax = 0;
+  const shipping = deleveryCharge;
+
+  const handlePayment = async () => {
+    try {
+      const { data } = await axios.post(
+        `${API_URL}/orders/create-order`,
+        {
+          items: cart?.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })),
+          tax,
+          shipping,
+          totalAmount: totalPayable,
+        },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      if (!data.success) {
+        toast.error("Payment Failed");
+      }
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: data.order.amount,
+        currency: data.order.currency,
+        order_id: data.order.id,
+        name: "smc-ecommerce-2026",
+        description: "order payment",
+        handler: async function (response) {
+          try {
+            const verifyRes = await axios.post(
+              `${API_URL}/orders/verify-payment`,
+              response,
+              { headers: { Authorization: `Bearer ${accessToken}` } },
+            );
+
+            if (verifyRes.data.success) {
+              toast.success("Payment Successful");
+              dispatch(setCart({ items: [], totalPrice: 0 }));
+              navigate("/order-success", {
+                state: {
+                  order: verifyRes.data.order, // 👈 pass full order
+                },
+              });
+            } else {
+              toast.error("Payment Verfication Failed");
+            }
+          } catch (error) {
+            toast.error("Something Went Wrong");
+          }
+        },
+        modal: {
+          ondismiss: async () => {
+            //Handler user class
+            await axios.post(
+              `${API_URL}/orders/verify-payment`,
+              { razorpay_order_id: data.order.id, paymentFailed: true },
+              { headers: { Authorization: `Bearer ${accessToken}` } },
+            );
+            toast.error("Payment Cancelled or Failed");
+          },
+        },
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: { color: "#F472B6" },
+      };
+
+      console.log("ckeck here");
+      const rzp = new window.Razorpay(options);
+
+      // Payment Failure
+      rzp.on("payment.failed", async function (response) {
+        console.log("error from rzp : ", response.error);
+        await axios.post(
+          `${API_URL}/orders/verify-payment`,
+          { razorpay_order_id: data.order.id, paymentFailed: true },
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+        toast.error("Payment Failed... Try Agian");
+      });
+
+      rzp.open();
+    } catch (error) {
+      console.error("error : ", error);
+      toast.error("Error Verification API Failed");
+    }
+  };
+
   return (
     <div className="mt-20 px-6 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
       {/* ================= LEFT: ADDRESS ================= */}
@@ -355,7 +454,7 @@ const DeliveryAddress = () => {
         </div>
 
         <button
-          onClick={handleProceed}
+          onClick={handlePayment}
           disabled={selectedIndex === undefined}
           className={`w-full py-3 rounded text-white ${
             selectedIndex === undefined
@@ -363,7 +462,7 @@ const DeliveryAddress = () => {
               : "bg-green-500 hover:bg-green-600"
           }`}
         >
-          Proceed to Payment
+          Proceed to Payment``
         </button>
       </div>
     </div>
