@@ -217,7 +217,7 @@ const Cart = () => {
                     </div>
 
                     <Button
-                      onClick={() => navigate("/address")}
+                      onClick={() => navigate("/address1")}
                       className="w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-white hover:bg-primary/90"
                     >
                       Proceed to Checkout
