@@ -161,6 +161,7 @@ const DeliveryAddress = () => {
 
       if (!data.success) {
         toast.error("Payment Failed");
+        return;
       }
 
       const options = {
@@ -181,11 +182,8 @@ const DeliveryAddress = () => {
             if (verifyRes.data.success) {
               toast.success("Payment Successful");
               dispatch(setCart({ items: [], totalPrice: 0 }));
-              navigate("/order-success", {
-                state: {
-                  order: verifyRes.data.order, // 👈 pass full order
-                },
-              });
+              console.log(`${verifyRes.data.order._id}`);
+              navigate(`/order-success/${verifyRes.data.order._id}`);
             } else {
               toast.error("Payment Verfication Failed");
             }
@@ -212,7 +210,11 @@ const DeliveryAddress = () => {
         theme: { color: "#F472B6" },
       };
 
-      console.log("ckeck here");
+      if (!window.Razorpay) {
+        toast.error("Payment SDK not loaded");
+        return;
+      }
+
       const rzp = new window.Razorpay(options);
 
       // Payment Failure

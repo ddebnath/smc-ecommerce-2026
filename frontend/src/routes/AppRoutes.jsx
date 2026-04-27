@@ -75,7 +75,7 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/order-success"
+          path="/order-success/:id"
           element={
             <ProtectedRoute>
               <PaymentSuccessful />

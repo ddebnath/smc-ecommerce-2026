@@ -3,6 +3,7 @@ import { Order } from "../models/order.models.js";
 import crypto from "crypto";
 import { Cart } from "../models/cart.models.js";
 import "dotenv/config.js";
+import mongoose from "mongoose";
 /* create order */
 
 export const createOrder = async (req, res) => {
@@ -119,6 +120,55 @@ export const verifyPayment = async (req, res) => {
     }
   } catch (error) {
     console.log("razor verification error : ", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// get order for loggedin user
+
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 🔒 Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+
+    // 🔍 Find order (only for logged-in user)
+    const order = await Order.findById(id)
+      .populate({
+        path: "items.productId",
+        select: "productName productPrice productImg",
+      })
+      .lean();
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // keeping only one product image
+    order.items = order.items.map((item) => ({
+      ...item,
+      productId: {
+        ...item.productId,
+        productImg: item.productId.productImg?.[0],
+      },
+    }));
+
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("getOrderById error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
