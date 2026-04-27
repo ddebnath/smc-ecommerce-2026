@@ -107,7 +107,7 @@ const PaymentSuccessful = () => {
         <div>
           <h2 className="text-lg font-semibold mb-3">Items Ordered</h2>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {products.map((product, index) => (
               <div key={index} className="flex gap-2 border-b pb-3">
                 <div className="flex flex-col">
