@@ -74,10 +74,10 @@ const PaymentSuccessful = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 px-4 py-10 flex justify-center">
-      <div className="bg-white shadow-xl rounded-2xl w-full max-w-3xl p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 px-4 py-4 flex justify-center">
+      <div className="bg-white shadow-xl rounded-2xl w-full max-w-3xl p-4 h-full max-h-3xl space-y-6">
         {/* Header */}
-        <div className="text-center">
+        <div className="text-center mt-5">
           <CheckCircle className="mx-auto text-green-500 w-16 h-16" />
           <h1 className="text-2xl font-bold mt-2">Payment Successful 🎉</h1>
           <p className="text-gray-500">
@@ -114,7 +114,7 @@ const PaymentSuccessful = () => {
                   <img
                     src={product.productImg.url}
                     alt=""
-                    className="w-20 h-20 object-cover rounded-lg"
+                    className="w-10 h-10 object-cover rounded-lg"
                   />
                   <p className="truncate w-20">{product.productName}</p>
                 </div>
@@ -135,7 +135,7 @@ const PaymentSuccessful = () => {
         </div>
 
         {/* Summary */}
-        <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+        <div className="bg-gray-50 rounded-lg p-2 space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>₹{order.subtotal || order.totalAmount}</span>
@@ -158,7 +158,7 @@ const PaymentSuccessful = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 mb-5">
           <button
             onClick={() => navigate("/orders")}
             className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
@@ -167,7 +167,7 @@ const PaymentSuccessful = () => {
           </button>
 
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/product")}
             className="flex-1 border py-2 rounded-lg hover:bg-gray-100"
           >
             Continue Shopping
