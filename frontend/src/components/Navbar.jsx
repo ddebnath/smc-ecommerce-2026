@@ -52,6 +52,9 @@ const Navbar = () => {
             >
               Products
             </NavLink>
+            <div>
+              {user && <Link to="/show-user-orders/${userId}">My Orders</Link>}
+            </div>
           </div>
 
           {/* Right Section */}
