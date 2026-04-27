@@ -185,7 +185,7 @@ export const getUerOrders = async (req, res) => {
     const { userId } = req.params;
 
     const orders = await Order.find({ user: req.user._id })
-      .select("totalAmount createdAt items") // only required fields
+      .select("totalAmount createdAt items status razorPayOrderId") // only required fields
       .populate({
         path: "items.productId",
         select: "productName productPrice", // only needed product fields

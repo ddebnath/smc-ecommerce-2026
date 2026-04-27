@@ -73,29 +73,42 @@ const ShowSingleUserOrders = () => {
                 {/* ===== HEADER ===== */}
                 <div className="flex flex-wrap justify-between gap-4 mb-2">
                   <div>
-                    <p className="text-xs text-gray-500">Order ID</p>
-                    <p className="font-medium text-gray-800 text-sm">
-                      #{order._id.slice(-10).toUpperCase()}
+                    <p className="text-sm font-bold text-gray-500">
+                      Payment ID
+                    </p>
+                    <p className="font-medium text-gray-500 text-xs">
+                      #{order.razorPayOrderId.slice(-6).toUpperCase()}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">Date</p>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm font-bold text-gray-500">
+                      Payment Status
+                    </p>
+                    <p className="font-medium text-gray-500 text-xs">
+                      {order.status}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-bold text-gray-500">Date</p>
+                    <p className="font-medium text-gray-500 text-xs">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">Total</p>
-                    <p className="font-semibold text-gray-800">
+                    <p className="text-sm font-bold text-gray-500">Total</p>
+                    <p className="font-bold text-gray-800 text-xs ">
                       ₹{order.totalAmount}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">Items</p>
-                    <p className="text-sm text-gray-700">{totalItems}</p>
+                    <p className="text-sm font-bold text-gray-500">Items</p>
+                    <p className="font-medium text-gray-500 text-xs">
+                      {totalItems}
+                    </p>
                   </div>
                 </div>
 
@@ -108,10 +121,12 @@ const ShowSingleUserOrders = () => {
                     >
                       {/* truncated product name */}
                       <div className="flex">
-                        <p className="text-gray-700 line-clamp-1 w-[85%] ">
+                        <p className="text-gray-800 line-clamp-1 w-[85%] ">
                           {index + 1}. {item.productId?.productName}
                         </p>
-                        <p className="font-bold">× {item.quantity}</p>
+                        <p className="font-semibold text-xs text-grey-700">
+                          × {item.quantity}
+                        </p>
                       </div>
                       <p className="font-medium text-gray-800">
                         ₹{item.productId?.productPrice * item.quantity}
