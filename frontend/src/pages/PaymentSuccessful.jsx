@@ -11,6 +11,7 @@ const PaymentSuccessful = () => {
   const [order, setOrder] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -23,6 +24,8 @@ const PaymentSuccessful = () => {
         });
 
         const orderData = orderRes.data.order;
+        setUserId(orderData.user);
+
         setOrder(orderData);
 
         for (const item of orderData.items) {
@@ -160,7 +163,7 @@ const PaymentSuccessful = () => {
         {/* Actions */}
         <div className="flex gap-3 mb-5">
           <button
-            onClick={() => navigate("/orders")}
+            onClick={() => navigate(`/show-user-orders/${userId}`)}
             className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
           >
             View Orders

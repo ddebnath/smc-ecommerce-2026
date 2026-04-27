@@ -175,3 +175,26 @@ export const getOrderById = async (req, res) => {
     });
   }
 };
+
+/*
+  get user specific order
+*/
+// GET /api/v1/orders/my-orders
+export const getUerOrders = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const orders = await Order.find({ user: req.user._id })
+      .select("totalAmount createdAt items") // only required fields
+      .populate({
+        path: "items.productId",
+        select: "productName productPrice", // only needed product fields
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

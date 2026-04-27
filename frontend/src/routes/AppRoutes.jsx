@@ -30,6 +30,7 @@ import EditProduct from "@/pages/Dashboard/EditProductDialog";
 // import AddressForm from "@/pages/AddressForm";
 import DeveleryAddress from "@/pages/DeleveryAddress";
 import PaymentSuccessful from "@/pages/PaymentSuccessful";
+import ShowSingleUserOrders from "@/pages/ShowSingleUserOrders";
 
 const AppRoutes = () => {
   return (
@@ -79,6 +80,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <PaymentSuccessful />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/show-user-orders/:userId"
+          element={
+            <ProtectedRoute>
+              <ShowSingleUserOrders />
             </ProtectedRoute>
           }
         />
