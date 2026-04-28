@@ -198,3 +198,34 @@ export const getUerOrders = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+/* admin all orders */
+
+export const getAllOrdersAdmin = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const orders = await Order.find()
+      .select("totalAmount createdAt items status razorPayOrderId user")
+      .populate({
+        path: "items.productId",
+        select: "productName productPrice productImg",
+      })
+      .populate({
+        path: "user",
+        select: "name email",
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

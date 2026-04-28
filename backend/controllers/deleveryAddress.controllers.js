@@ -9,7 +9,7 @@ export const getUserAddresses = async (req, res) => {
 
     let data = await DeleveryAddress.findOne({ userId });
 
-    // create empty doc if not exists
+    // create empty address if not exists
     if (!data) {
       data = await DeleveryAddress.create({
         userId,
