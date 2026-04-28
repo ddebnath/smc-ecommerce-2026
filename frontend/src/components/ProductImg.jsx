@@ -3,6 +3,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 
 const ProductImg = ({ images }) => {
+  const [zoom, setZoom] = useState(false);
   const [mainImage, setMainImage] = useState(images[0].url);
   return (
     <div className="flex gap-5 w-max">
@@ -19,6 +20,7 @@ const ProductImg = ({ images }) => {
           );
         })}
       </div>
+
       <Zoom>
         <img
           src={mainImage}

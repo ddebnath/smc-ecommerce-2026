@@ -125,7 +125,7 @@ const ShowSingleUserOrders = () => {
                           {index + 1}. {item.productId?.productName}
                         </p>
                         <p className="font-semibold text-xs text-grey-700">
-                          × {item.quantity}
+                          - {item.quantity} Qty
                         </p>
                       </div>
                       <p className="font-medium text-gray-800">
