@@ -278,12 +278,7 @@ export const login = async (req, res) => {
       the user at a time.
     */
 
-    const currentSession = await Session.findOne({ userId: user._id });
-
-    if (currentSession) {
-      await Session.deleteOne({ userId: user._id });
-    }
-
+    await Session.deleteMany({ userId: user._id });
     /*
       After deleting the existing session (if any), we create a new session for the user
       and save it in the database. This session will be used to track the user's login 

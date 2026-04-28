@@ -7,16 +7,49 @@ import store from "@/redux/store";
 import { toast } from "sonner";
 import { setCart } from "@/redux/slices/productSlice";
 import { useNavigate } from "react-router-dom";
+import { Country, State, City } from "country-state-city";
+import { useMemo } from "react";
+
+// shadcn
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+
+import { Button } from "@/components/ui/button";
 
 const DeliveryAddress = () => {
   const accessToken = localStorage.getItem("accessToken");
   const { cart } = useSelector((store) => store.product);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // ================= DATA =================
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [stateOpen, setStateOpen] = useState(false);
+  const [cityOpen, setCityOpen] = useState(false);
+
+  const [selectedCountry, setSelectedCountry] = useState("");
+
   const [addresses, setAddresses] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(undefined);
   const [showForm, setShowForm] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("COD");
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -50,7 +83,33 @@ const DeliveryAddress = () => {
     getAddresses();
   }, []);
 
+  //==================COUNTRY & STATE HANDLERS==========
+  const handleCountryChange = (code) => {
+    setSelectedCountry(code);
+
+    setStates(State.getStatesOfCountry(code));
+    setCities([]);
+
+    setFormData((prev) => ({
+      ...prev,
+      country: countries.find((c) => c.isoCode === code)?.name,
+      state: "",
+      city: "",
+    }));
+  };
+
+  const handleStateChange = (stateCode, stateName) => {
+    setCities(City.getCitiesOfState("IN", stateCode));
+
+    setFormData((prev) => ({
+      ...prev,
+      state: stateName,
+      city: "",
+    }));
+  };
+
   // ================= INPUT =================
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -126,6 +185,14 @@ const DeliveryAddress = () => {
     if (selectedIndex === undefined) {
       alert("Please select an address");
       return;
+    }
+
+    if (paymentMethod === "CARD") {
+      handlePayment();
+    }
+
+    if (paymentMethod === "COD") {
+      navigate("/payment/COD");
     }
 
     console.log("Proceeding with:", {
@@ -333,7 +400,8 @@ const DeliveryAddress = () => {
               className="p-3 border rounded"
               required
             />
-            <input
+
+            {/* <input
               name="city"
               value={formData.city}
               onChange={handleChange}
@@ -356,8 +424,119 @@ const DeliveryAddress = () => {
               placeholder="Country"
               className="p-3 border rounded"
               required
-            />
+            /> */}
 
+            {/* COUNTRY */}
+            <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-10 justify-between">
+                  {formData.country || "Select Country"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0">
+                <Command>
+                  <CommandInput placeholder="Search country..." />
+                  <CommandList className="max-h-60 overflow-y-auto">
+                    <CommandGroup>
+                      {countries.map((c) => (
+                        <CommandItem
+                          key={c.isoCode}
+                          value={c.name}
+                          onSelect={() => {
+                            handleCountryChange(c.isoCode);
+                            setCountryOpen(false);
+                          }}
+                        >
+                          {c.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            {/* STATE */}
+            {selectedCountry === "IN" ? (
+              <Popover open={stateOpen} onOpenChange={setStateOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline">
+                    {formData.state || "Select State"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Command>
+                    <CommandInput placeholder="Search state..." />
+                    <CommandList className="max-h-60 overflow-y-auto">
+                      <CommandGroup>
+                        {states.map((s) => (
+                          <CommandItem
+                            key={s.isoCode}
+                            value={s.name}
+                            onSelect={() => {
+                              handleStateChange(s.isoCode, s.name);
+                              setStateOpen(false);
+                            }}
+                          >
+                            {s.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <input
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                placeholder="State"
+                className="p-3 border rounded"
+                required
+              />
+            )}
+
+            {/* CITY */}
+            {selectedCountry === "IN" ? (
+              <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline">
+                    {formData.city || "Select City"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Command>
+                    <CommandInput placeholder="Search city..." />
+                    <CommandList className="max-h-60 overflow-y-auto">
+                      <CommandGroup>
+                        {cities.map((c, i) => (
+                          <CommandItem
+                            key={i}
+                            value={c.name}
+                            onSelect={(value) => {
+                              setFormData((prev) => ({ ...prev, city: value }));
+                              setCityOpen(false);
+                            }}
+                          >
+                            {c.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <input
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="City"
+                className="p-3 border rounded"
+                required
+              />
+            )}
             <textarea
               name="address"
               value={formData.address}
@@ -397,7 +576,8 @@ const DeliveryAddress = () => {
             <p>{addresses[selectedIndex].fullName}</p>
             <p>{addresses[selectedIndex].address}</p>
             <p>
-              {addresses[selectedIndex].city}, {addresses[selectedIndex].state}
+              {addresses[selectedIndex].city}, {addresses[selectedIndex].state},{" "}
+              {addresses[selectedIndex].country}
             </p>
             <p>{addresses[selectedIndex].phone}</p>
           </div>
@@ -456,7 +636,7 @@ const DeliveryAddress = () => {
         </div>
 
         <button
-          onClick={handlePayment}
+          onClick={handleProceed}
           disabled={selectedIndex === undefined}
           className={`w-full py-3 rounded text-white ${
             selectedIndex === undefined

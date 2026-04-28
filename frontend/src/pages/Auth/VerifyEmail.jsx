@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { API_URL } from "@/config/api";
+import { API_URL } from "../../config/api.js";
 
 const VerifyEmail = () => {
   const { token } = useParams();

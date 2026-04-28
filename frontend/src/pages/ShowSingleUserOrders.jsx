@@ -7,7 +7,6 @@ import { useParams, useNavigate } from "react-router-dom";
 const ShowSingleUserOrders = () => {
   const accessToken = localStorage.getItem("accessToken");
   const { userId } = useParams();
-  const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +54,7 @@ const ShowSingleUserOrders = () => {
     <div className="w-screen mb-5 ">
       <div className="max-w-7xl mx-auto mt-5 px-4 min-h-screen">
         <h2 className="text-3xl  font-semibold mb-10 text-center text-blue-800">
-          My Orders
+          Orders
         </h2>
 
         <div className="space-y-6">

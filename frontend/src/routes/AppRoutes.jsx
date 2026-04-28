@@ -1,5 +1,4 @@
-import { Routes, Route } from "react-router-dom";
-
+import { Route, Routes } from "react-router-dom";
 // Layouts
 import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
@@ -12,25 +11,21 @@ import Product from "../pages/product/Product";
 import Login from "../pages/Auth/Login";
 import Signup from "../pages/Auth/Signup";
 import Verify from "../pages/Auth/Verify";
-import VerifyEmail from "@/pages/Auth/VerifyEmail";
-import Logout from "@/pages/Auth/Logout";
-import Dashboard from "@/pages/Dashboard/Dashboard";
-import AdminSales from "@/pages/AdminPages/AdminSales";
-import AddProduct from "@/pages/AdminPages/AddProduct";
-import AdminProduct from "@/pages/AdminPages/AdminProduct";
-import AdminOrders from "@/pages/AdminPages/AdminOrders";
-import ShowUserOrders from "@/pages/AdminPages/ShowUserOrders";
-import AdminUsers from "@/pages/AdminPages/AdminUsers";
-import UserInfo from "@/pages/AdminPages/UserInfo";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import SingleProduct from "@/pages/product/SingleProduct";
-import EditProduct from "@/pages/Dashboard/EditProductDialog";
-// import AddressForm from "@/pages/AddressForm";
-import DeveleryAddress from "@/pages/DeleveryAddress";
-import PaymentSuccessful from "@/pages/PaymentSuccessful";
-import ShowSingleUserOrders from "@/pages/ShowSingleUserOrders";
+import VerifyEmail from "../pages/Auth/VerifyEmail";
+import Dashboard from "../pages/Dashboard/Dashboard";
+import AddProduct from "../pages/AdminPages/AddProduct";
+import AdminProduct from "../pages/AdminPages/AdminProduct";
+import AdminOrders from "../pages/AdminPages/AdminOrders";
+import AdminUsers from "../pages/AdminPages/AdminUsers";
+import UserInfo from "../pages/AdminPages/UserInfo";
+import ProtectedRoute from "../components/ProtectedRoute";
+import SingleProduct from "../pages/product/SingleProduct";
+import DeveleryAddress from "../pages/DeleveryAddress";
+import PaymentSuccessful from "../pages/PaymentSuccessful";
+import ShowSingleUserOrders from "../pages/ShowSingleUserOrders";
+import Logout from "../pages/Auth/Logout";
+import AdminDashBoard from "@/pages/AdminPages/AdminDashBoard";
+import CashOnDelivery from "@/pages/payment/CashOnDelevery";
 
 const AppRoutes = () => {
   return (
@@ -59,14 +54,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-          path="/address"
-          element={
-            <ProtectedRoute>
-              <AddressForm />
-            </ProtectedRoute>
-          }
-        /> */}
+
         <Route
           path="/address1"
           element={
@@ -75,6 +63,15 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/payment/COD"
+          element={
+            <ProtectedRoute>
+              <CashOnDelivery />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/order-success/:id"
           element={
@@ -112,13 +109,13 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="sales" element={<AdminSales />} />
+        <Route path="sales" element={<AdminDashBoard />} />
         <Route path="add-product" element={<AddProduct />} />
         <Route path="products" element={<AdminProduct />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="users/:id" element={<UserInfo />} />
-        <Route path="users/orders/:userId" element={<ShowUserOrders />} />
+        <Route path="users/orders/:userId" element={<ShowSingleUserOrders />} />
       </Route>
     </Routes>
   );
