@@ -5,13 +5,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 function AlertMessage() {
   return (
     <div className="grid w-full max-w-md items-start gap-4">
-      <Alert>
+      <Alert className="bg-slate-300">
         <CheckCircle2Icon />
-        <AlertTitle className="text-red-600 text-center">
-          {" "}
+        <AlertTitle className="text-red-600 text-2xl text-center">
           Login First
         </AlertTitle>
-        <AlertDescription> Login to add products to the cart</AlertDescription>
+        <AlertDescription className="">
+          Login to add products to the cart
+        </AlertDescription>
       </Alert>
     </div>
   );

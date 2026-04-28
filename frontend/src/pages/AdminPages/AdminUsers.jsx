@@ -157,6 +157,7 @@ const AdminUsers = () => {
                     >
                       <option value="user">User</option>
                       <option value="admin">Admin</option>
+                      <option value="productOwner">Product Owner</option>
                     </select>
                   </td>
 

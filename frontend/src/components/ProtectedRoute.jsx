@@ -10,8 +10,8 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   if (!user) {
     return (
       <>
-        {toast.success("login first to access page")}
-        <Navigate to="/auth/login" />
+        //{toast.success("login first to access page")}
+        <Navigate to="/auth/login" state={{ loginStatus: "login_first" }} />
       </>
     );
   }

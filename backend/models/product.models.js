@@ -34,6 +34,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+      default: function () {
+        return this.userId;
+      },
+    },
   },
   { timestamps: true },
 );
