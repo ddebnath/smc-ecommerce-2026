@@ -30,8 +30,8 @@ const ProductCard = ({ product = {}, loading }) => {
 
   const addToCart = async () => {
     if (!user) {
-      toast.error("Please login to add products to cart");
-      return; // ❗ stop execution
+      navigate("/auth/login ", { state: { loginStatus: "login_first" } });
+      return;
     }
 
     try {

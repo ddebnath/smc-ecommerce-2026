@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,8 +17,11 @@ import { toast } from "sonner";
 import { API_URL } from "../../config/api.js";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
+import AlertMessage from "@/components/AlertMessage.jsx";
 
 const Login = () => {
+  const [showMessage, setShowMessage] = useState(false);
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,6 +31,19 @@ const Login = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loginStatus } = location.state || {};
+
+  useEffect(() => {
+    if (loginStatus === "login_first") {
+      setShowMessage(true);
+    }
+
+    const timer = setTimeout(() => {
+      setShowMessage(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,7 +91,12 @@ const Login = () => {
       </div>
 
       {/* RIGHT SIDE (Form) */}
-      <div className="flex items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+
+      <div className="flex flex-col items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col justify-center items-center">
+          {showMessage && <AlertMessage />}
+        </div>
+
         <Card className="w-full max-w-md shadow-xl border-0 rounded-2xl">
           <CardHeader className="text-center space-y-1 pb-2">
             <CardTitle className="text-2xl font-bold text-gray-800">
