@@ -75,9 +75,7 @@ const AddProduct = () => {
       if (res.data.success) {
         toast.success("product added successfully");
         dispatch(setProducts([...products, res.data.product]));
-        navigate("/dashboard/sales");
-
-        // console.log("All Products: ", products);
+        navigate("/dashboard/products");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Bad Request");

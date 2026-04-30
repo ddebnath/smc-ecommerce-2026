@@ -75,7 +75,7 @@ const ProductAddProduct = () => {
       setLoading(true);
 
       const res = await axios.delete(
-        `${API_URL}/product/product-delete/${product._id}`,
+        `${API_URL}/product/delete/${product._id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -95,7 +95,7 @@ const ProductAddProduct = () => {
 
   useEffect(() => {
     getOwnerProduct();
-  }, [products]);
+  }, [products, handleDelete]);
 
   return (
     <div className="pl-[350px] py-20 pr-20 flex flex-col gap-3 min-h-screen bg-gray-100">

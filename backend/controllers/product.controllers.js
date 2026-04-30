@@ -12,6 +12,13 @@ import { Product } from "../models/product.models.js";
 
 export const addProduct = async (req, res) => {
   try {
+    const userId = req.id;
+    const user = req.user;
+
+    if (user.role !== "admin" && user.role !== "productOwner") {
+      return res.status(400).json({ success: false, message: "Access Denied" });
+    }
+
     const {
       productName,
       productDesc,
@@ -21,8 +28,6 @@ export const addProduct = async (req, res) => {
       quantity,
       sold,
     } = req.body;
-
-    const userId = req.id;
 
     if (!productName || !productDesc || !productPrice || !category || !brand) {
       return res
@@ -146,6 +151,8 @@ export const getProductById = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { productId } = req.params;
+    const user = req.user;
+    let product;
 
     if (!productId) {
       return res
@@ -153,7 +160,11 @@ export const deleteProduct = async (req, res) => {
         .json({ success: false, message: "Product ID is required" });
     }
 
-    const product = await Product.findById(productId);
+    if (user.role === "admin") {
+      product = await Product.findById(productId);
+    } else {
+      product = await Product.findOne({ _id: productId, owner: user._id });
+    }
 
     if (!product) {
       return res
@@ -201,7 +212,24 @@ export const deleteProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
+    const user = req.user;
     const { productId } = req.params;
+
+    if (user.role !== "admin" && user.role !== "productOwner") {
+      return res.status(404).json({
+        success: false,
+        message: "Access Denied",
+      });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
 
     const {
       productName,
@@ -213,15 +241,6 @@ export const updateProduct = async (req, res) => {
       sold,
       existingImages, // public_id(s)
     } = req.body;
-
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
 
     // ==============================
     // 1. Normalize existingImages
@@ -303,79 +322,6 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-/* 
-add products by the product owner
-
-*/
-
-export const addOwnProduct = async (req, res) => {
-  try {
-    const {
-      productName,
-      productDesc,
-      productPrice,
-      category,
-      brand,
-      quantity,
-      sold,
-    } = req.body;
-
-    const userId = req.id;
-
-    if (!productName || !productDesc || !productPrice || !category || !brand) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
-    }
-    const safeCategory = category
-      ? category.toLowerCase().replace(/[^a-z0-9]/g, "-")
-      : "uncategorized";
-
-    // handle multiple image upload
-    let productImg = [];
-    if (req.files && req.files.length > 0) {
-      for (let file of req.files) {
-        const fileUri = getDataUri(file);
-        const result = await cloudinary.uploader.upload(fileUri, {
-          folder: `products/${safeCategory}/${userId}`, // cloudinary folder to store product images
-          public_id: `${safeCategory}/${userId}/${Date.now()}`,
-        });
-
-        productImg.push({
-          public_id: result.public_id,
-          url: result.secure_url,
-        });
-      }
-    } else {
-      return res
-        .status(400)
-        .json({ success: false, message: "At least 1 image is required" });
-    }
-
-    // create a product in DB
-
-    const newProduct = await Product.create({
-      userId,
-      productName,
-      productDesc,
-      productPrice,
-      category,
-      brand,
-      quantity,
-      sold,
-      productImg, //array of objects [{url, public_id},{url, public_id}]
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "product added successfully",
-      product: newProduct,
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 /*get products by product owner */
 export const getProductOwnerProduct = async (req, res) => {
   try {
@@ -401,56 +347,5 @@ export const getProductOwnerProduct = async (req, res) => {
       success: false,
       message: error.message,
     });
-  }
-};
-
-/* delete product by owner */
-
-export const deleteOwnProduct = async (req, res) => {
-  try {
-    const { productId } = req.params;
-
-    if (!productId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product ID is required" });
-    }
-
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
-    }
-
-    const safeCategory = product.category
-      ? product.category.toLowerCase().replace(/[^a-z0-9]/g, "-")
-      : "uncategorized";
-
-    // ✅ delete all images
-
-    for (let img of product.productImg) {
-      await cloudinary.uploader.destroy(img.public_id);
-    }
-
-    const folderPath = `products/${safeCategory}/${product._id}`;
-
-    // ✅ delete folder (only if empty)
-    try {
-      await cloudinary.api.delete_folder(folderPath);
-    } catch (error) {
-      console.error("Folder not empty or not found");
-    }
-
-    // ✅ delete product from DB
-    await product.deleteOne();
-
-    return res.status(200).json({
-      success: true,
-      message: "Product deleted successfully",
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
   }
 };

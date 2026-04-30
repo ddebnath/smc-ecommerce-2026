@@ -72,6 +72,7 @@ const AdminProduct = () => {
       if (res.data.success) {
         toast.success(res.data.message);
         dispatch(setProducts(remainingProducts));
+        navigate("/dashboard/products");
       }
     } catch (error) {
       console.error("Delete failed:", error);

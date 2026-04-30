@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -68,20 +68,14 @@ const ProductAddProduct = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(
-        `${API_URL}/product/owner-product`,
-        formData,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      );
+      const res = await axios.post(`${API_URL}/product/add`, formData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
       if (res.data.success) {
         toast.success("product added successfully");
         dispatch(setProducts([...products, res.data.product]));
         navigate("/product-owner-dashboard/");
-
-        // console.log("All Products: ", products);
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Bad Request");

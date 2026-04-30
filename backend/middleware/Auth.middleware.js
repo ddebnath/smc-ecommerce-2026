@@ -86,3 +86,34 @@ export const isProductOwner = async (req, res, next) => {
     return res.status(403).json({ success: false, message: "access denied" });
   }
 };
+
+// middleware/authorizeRoles
+export const authorizeRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    try {
+      // 🚫 No user (should already be handled by isAuthenticated)
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized. Please login.",
+        });
+      }
+
+      // 🚫 Role not allowed
+      if (!allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied. Insufficient permissions.",
+        });
+      }
+
+      // ✅ Allowed
+      next();
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };
+};
