@@ -30,7 +30,12 @@ export const isAuthenticated = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     let decoded;
+
     try {
       decoded = jwt.verify(token, process.env.SECRET_KEY);
     } catch (error) {
@@ -40,6 +45,7 @@ export const isAuthenticated = async (req, res, next) => {
           message: "access token has expired",
         });
       }
+
       return res.status(400).json({
         success: false,
         message: "access token is missing or invalid",
@@ -47,10 +53,13 @@ export const isAuthenticated = async (req, res, next) => {
     }
 
     const user = await User.findById(decoded.id);
-    if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "user not found" });
+
+    // USER NOT FOUND OR BLOCKED USER CHECK
+    if (!user || !user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked or user is not found",
+      });
     }
 
     // Attach authenticated user data to the request for downstream handlers.

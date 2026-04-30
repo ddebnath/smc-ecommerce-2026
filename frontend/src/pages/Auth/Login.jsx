@@ -60,6 +60,12 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
       });
 
+      if (res.data.user.role === "blocked") {
+        toast.error("User has been blocked.. request admin to unblock", {
+          position: "top-center",
+        });
+        return;
+      }
       dispatch(setUser(res.data.user)); // Update Redux store with user data
 
       // create a local storage for access token and user data
@@ -94,7 +100,7 @@ const Login = () => {
 
       <div className="flex flex-col items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-center items-center">
-          {showMessage && <AlertMessage />}
+          {showMessage && <AlertMessage message="You Need To Login First" />}
         </div>
 
         <Card className="w-full max-w-md shadow-xl border-0 rounded-2xl">

@@ -14,6 +14,10 @@ const userSchema = new Schema(
       enum: ["user", "admin", "productOwner"],
       default: "user",
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     token: { type: String, default: null },
     isVerified: { type: Boolean, default: false },
     isLoggedIn: { type: Boolean, default: false },

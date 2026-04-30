@@ -12,6 +12,7 @@ import {
   getUserById,
   updateUser,
   getCurrentUser,
+  blockUser,
 } from "../controllers/user.controllers.js";
 import { isAuthenticated, isAdmin } from "../middleware/Auth.middleware.js";
 import { singleUpload } from "../middleware/multer.js";
@@ -30,5 +31,6 @@ router.get("/auth/get-all-users", isAuthenticated, isAdmin, getAllUser);
 router.get("/auth/get-user/:userId", getUserById);
 router.put("/auth/update-user/:id", isAuthenticated, singleUpload, updateUser);
 router.get("/auth/me", isAuthenticated, getCurrentUser);
+router.post("/auth/block-user/:id", isAuthenticated, isAdmin, blockUser);
 
 export default router;

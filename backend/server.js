@@ -7,7 +7,7 @@ import cartRoutes from "./routes/cart.routes.js";
 import deleveryRoutes from "./routes/deleveryAddress.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import cors from "cors";
-
+import { verifyEmail } from "./email_verification/varify.email.js";
 // Create an instance of the Express application
 const app = express();
 
@@ -32,6 +32,14 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
+
+// app.get("/test-email", async (req, res) => {
+//   await verifyEmail(
+//     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZjJkNzczZGIwMmYxMGMwNDUzNTUxMCIsImlhdCI6MTc3NzUyMjU0NywiZXhwIjoxNzc3NTIzMTQ3fQ.c1FfQ4OdxdZ6Q1UCsx5rvTXn9R4fVUjoxhVuhip4t8k",
+//     "d.debnath@smcs.ac.in",
+//   );
+//   res.send("done");
+// });
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/product", productRoutes);

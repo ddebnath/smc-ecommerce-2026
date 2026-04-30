@@ -1,96 +1,61 @@
-// import nodemailer from "nodemailer";
-// import "dotenv/config";
-
-// export const verifyEmail = async (token, email) => {
-//   try {
-//     // Create transporter
-
-//     const transporter = nodemailer.createTransport({
-//       host: "smtp.gmail.com",
-//       port: 587,
-//       secure: false, // true for 465, false for other ports
-//       requireTLS: true, // ensure TLS is used
-//       logger: true, // enable logging for debugging
-//       debug: true, // include SMTP traffic in logs
-
-//       auth: {
-//         user: process.env.MAIL_USER,
-//         pass: process.env.MAIL_PASSWORD,
-//       },
-//     });
-
-//     // Frontend URL (for verification link)
-//     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-
-//     const verificationLink = `${frontendUrl}/auth/verify/${token}`;
-
-//     // Mail content
-//     const mailOptions = {
-//       from: process.env.MAIL_USER,
-//       to: email,
-//       subject: "Verify Your Email",
-
-//       // plain text (fallback)
-//       text: `Click the link to verify your email: ${verificationLink}`,
-
-//       // better UI
-
-//       html: `
-//         <h2>Email Verification</h2>
-//         <p>Please click the button below to verify your email:</p>
-//         <a href="${verificationLink}"
-//            style="padding:10px 20px; background:#4CAF50; color:#fff; text-decoration:none;">
-//            Verify Email
-//         </a>
-//         <p>If you did not request this, ignore this email.</p>
-//       `,
-//     };
-
-//     // Send email
-//     const info = await transporter.sendMail(mailOptions);
-
-//     console.log("Email sent:", info.response);
-
-//     return info;
-//   } catch (error) {
-//     console.error(" Email error:", error.message);
-//     throw new Error("Failed to send verification email");
-//   }
-// };
-
 // import dotenv from "dotenv";
 // import { Resend } from "resend";
 
 // dotenv.config();
 
-// const resend = new Resend(`${process.env.RESEND_API_KEY}`);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 
 // export const verifyEmail = async (token, email) => {
 //   const recipient = String(email || "").trim();
-
-//   const link = `${process.env.FRONTEND_URL}/auth/verify/${token}`;
 
 //   if (!recipient) {
 //     throw new Error("Recipient email is required");
 //   }
 
+//   if (!token) {
+//     throw new Error("Verification token is required");
+//   }
+
+//   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+//   const link = `${frontendUrl}/auth/verify/${token}`;
+
 //   try {
-//     const result = await resend.emails.send({
+//     const { data, error } = await resend.emails.send({
 //       from: "onboarding@resend.dev",
 //       to: recipient,
 //       subject: "Verify your email",
 //       text: `Verify your email by visiting: ${link}`,
-//       html: `<p>Please click the link below to verify your email:</p><a href="${link}">Verify Email</a>`,
+//       html: `
+//       <div style="font-family: Arial, sans-serif; padding: 20px;">
+//         <h2>Email Verification</h2>
+//         <p>Please click the button below to verify your email:</p>
+
+//         <a href="${link}"
+//            style="display:inline-block;padding:12px 20px;
+//                   background:#2563eb;color:#fff;
+//                   border-radius:6px;text-decoration:none;">
+//           Verify Email
+//         </a>
+
+//         <p style="margin-top:15px;">
+//           Or copy this link:<br/>
+//           <a href="${link}">${link}</a>
+//         </p>
+//       </div>
+//     `,
 //     });
 
-//     console.log("Email sent to:", recipient, "resend result:", result);
-//     console.log(
-//       "Resolved messageId:",
-//       result.id ?? result.messageId ?? result.message_id,
-//     );
-//     return result;
+//     if (error) {
+//       console.error("Resend error:", error);
+//       throw new Error(error.message);
+//     }
+
+//     console.log("Email sent successfully:", data?.id);
+
+//     return data; // optional
 //   } catch (error) {
-//     console.error("Error sending email to:", recipient, error);
+//     console.error("Error sending email:", error?.message, error);
 //     throw new Error(
 //       `Failed to send email to ${recipient}: ${error.message || error}`,
 //     );

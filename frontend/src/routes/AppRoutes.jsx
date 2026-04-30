@@ -31,7 +31,93 @@ import ProductAddProduct from "@/pages/ProductAdminPages/ProductAddProduct";
 import ProductOrdersProduct from "@/pages/ProductAdminPages/ProductOrdersProduct";
 import ProductPanel from "@/pages/Dashboard/ProductPanel";
 import ProductDashBoard from "@/pages/ProductAdminPages/ProductDashBoard";
+import ImageGallery from "@/pages/ImageGallery/ImageGallery";
+
 const AppRoutes = () => {
+  const images = [
+    // earrings
+    {
+      url: "https://images.pexels.com/photos/7349539/pexels-photo-7349539.jpeg",
+      category: "Fashion",
+    },
+    // 🍰 Cakes
+    {
+      url: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop",
+      category: "Cake",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=500&auto=format&fit=crop",
+      category: "Cake",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&auto=format&fit=crop",
+      category: "Cake",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500&auto=format&fit=crop",
+      category: "Cake",
+    },
+
+    // 🍔 Snacks
+    {
+      url: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&auto=format&fit=crop",
+      category: "Snacks",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=500&auto=format&fit=crop",
+      category: "Snacks",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop",
+      category: "Snacks",
+    },
+
+    // 🍹 Drinks
+    {
+      url: "https://images.unsplash.com/photo-1497534446932-c925b458314e?w=500&auto=format&fit=crop",
+      category: "Drinks",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&auto=format&fit=crop",
+      category: "Drinks",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1510627498534-cf7e9002facc?w=500&auto=format&fit=crop",
+      category: "Drinks",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=500&auto=format&fit=crop",
+      category: "Drinks",
+    },
+
+    // 🍕 Meals
+    {
+      url: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop",
+      category: "Meals",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop",
+      category: "Meals",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&auto=format&fit=crop",
+      category: "Meals",
+    },
+
+    // 🥐 Bakery
+    {
+      url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop",
+      category: "Bakery",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=500&auto=format&fit=crop",
+      category: "Bakery",
+    },
+    // {
+    //   url: "https://images.unsplash.com/photo-1587731608655-8c64b0f6c0d4?w=500&auto=format&fit=crop",
+    //   category: "Bakery",
+    // },
+  ];
   return (
     <Routes>
       {/* Public Layout */}
@@ -48,6 +134,7 @@ const AppRoutes = () => {
         />
 
         <Route path="/product" element={<Product />} />
+        <Route path="/gallery" element={<ImageGallery images={images} />} />
         <Route path="/product/:id" element={<SingleProduct />} />
 
         <Route

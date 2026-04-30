@@ -673,7 +673,6 @@ export const updateUser = async (req, res) => {
     user.zipcode = zipcode || user.zipcode;
     user.phoneNo = phoneNo || user.phoneNo;
     user.role = role || user.role;
-
     user.profilePic = profilePicUrl;
     user.profilePicPublicId = profilePicPublicId;
 
@@ -713,6 +712,55 @@ export const getCurrentUser = async (req, res) => {
   } catch (error) {
     console.log("getCurrentUser error:", error);
     res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+/* block user controller */
+export const blockUser = async (req, res) => {
+  try {
+    const blockUserId = req.params.id; // target user
+    const currentUser = req.user; // logged-in admin
+
+    const { isActive } = req.body;
+
+    // 🔒 Only admin allowed
+    if (currentUser.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Access Denied" });
+    }
+
+    // 🚫 Prevent admin from blocking himself
+    if (currentUser._id.toString() === blockUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot block yourself",
+      });
+    }
+
+    // ✅ Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      blockUserId,
+      { $set: { isActive } },
+      { returnDocument: "after" },
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: isActive ? "User unblocked" : "User blocked",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log("block user error:", error);
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });

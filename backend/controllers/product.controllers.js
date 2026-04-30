@@ -215,8 +215,9 @@ export const updateProduct = async (req, res) => {
     const user = req.user;
     const { productId } = req.params;
 
-    if (user.role !== "admin" && user.role !== "productOwner") {
-      return res.status(404).json({
+    // 🔒 Authorization
+    if (!["admin", "productOwner"].includes(user.role)) {
+      return res.status(403).json({
         success: false,
         message: "Access Denied",
       });
@@ -239,52 +240,74 @@ export const updateProduct = async (req, res) => {
       brand,
       quantity,
       sold,
-      existingImages, // public_id(s)
+      isPublished,
+      existingImages, // optional
     } = req.body;
 
     // ==============================
-    // 1. Normalize existingImages
+    // ✅ 1. UPDATE BASIC FIELDS (SAFE)
     // ==============================
-    let keepIds = [];
+    product.productName = productName ?? product.productName;
+    product.productDesc = productDesc ?? product.productDesc;
+    product.productPrice = productPrice ?? product.productPrice;
+    product.category = category ?? product.category;
+    product.brand = brand ?? product.brand;
+    product.quantity = quantity ?? product.quantity;
+    product.sold = sold ?? product.sold;
+    product.isPublished = isPublished ?? product.isPublished;
 
-    if (existingImages) {
-      keepIds = Array.isArray(existingImages)
+    // ==============================
+    // ✅ 2. IMAGE HANDLING (STRICT & SAFE)
+    // ==============================
+    let updatedImages = product.productImg;
+
+    // 👉 ONLY run if explicitly sent
+    if (typeof existingImages !== "undefined") {
+      const keepIds = Array.isArray(existingImages)
         ? existingImages
         : [existingImages];
+
+      // ❌ Prevent deleting all images accidentally
+      if (keepIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "At least one image must be retained",
+        });
+      }
+
+      // Keep selected images
+      updatedImages = product.productImg.filter((img) =>
+        keepIds.includes(img.public_id),
+      );
+
+      // Find removed images
+      const removedImages = product.productImg.filter(
+        (img) => !keepIds.includes(img.public_id),
+      );
+
+      // Delete from Cloudinary
+      for (let img of removedImages) {
+        try {
+          await cloudinary.uploader.destroy(img.public_id);
+        } catch (err) {
+          console.error("Cloudinary delete failed:", err.message);
+        }
+      }
     }
 
     // ==============================
-    // 2. Keep only selected images
+    // ✅ 3. UPLOAD NEW IMAGES (OPTIONAL)
     // ==============================
-    let updatedImages = product.productImg.filter((img) =>
-      keepIds.includes(img.public_id),
-    );
-
-    // ==============================
-    // 3. Delete removed images
-    // ==============================
-    const deletedImages = product.productImg.filter(
-      (img) => !keepIds.includes(img.public_id),
-    );
-
-    for (let img of deletedImages) {
-      await cloudinary.uploader.destroy(img.public_id);
-    }
-
-    // ==============================
-    // 4. Upload new images
-    // ==============================
-
-    const safeCategory = product.category
-      ? product.category.toLowerCase().replace(/[^a-z0-9]/g, "-")
-      : "uncategorized";
-
     if (req.files && req.files.length > 0) {
+      const safeCategory = (category ?? product.category ?? "uncategorized")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-");
+
       for (let file of req.files) {
         const fileUri = getDataUri(file);
 
         const result = await cloudinary.uploader.upload(fileUri, {
-          folder: `products/${safeCategory}/${product._id}`, // cloudinary folder to store product images
+          folder: `products/${safeCategory}/${product._id}`,
           public_id: `${safeCategory}/${product._id}/${Date.now()}`,
         });
 
@@ -295,18 +318,12 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // ==============================
-    // 5. Update product fields
-    // ==============================
-    product.productName = productName || product.productName;
-    product.productDesc = productDesc || product.productDesc;
-    product.productPrice = productPrice || product.productPrice;
-    product.category = category || product.category;
-    product.brand = brand || product.brand;
-    product.quantity = quantity || product.quantity;
-    product.sold = sold || product.sold;
+    // Final image assignment
     product.productImg = updatedImages;
 
+    // ==============================
+    // ✅ 4. SAVE
+    // ==============================
     const updatedProduct = await product.save();
 
     return res.status(200).json({
@@ -315,6 +332,7 @@ export const updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
+    console.error("Update error:", error);
     return res.status(500).json({
       success: false,
       message: error.message,

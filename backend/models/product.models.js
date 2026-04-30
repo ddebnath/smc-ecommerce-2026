@@ -59,6 +59,11 @@ const productSchema = new mongoose.Schema(
         message: "Sold cannot be greater than quantity",
       },
     },
+
+    isPublished: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 );
