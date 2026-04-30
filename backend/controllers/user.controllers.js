@@ -610,6 +610,8 @@ export const updateUser = async (req, res) => {
       city,
       zipcode,
       phoneNo,
+      country,
+      state,
       role,
     } = req.body;
 
@@ -666,6 +668,8 @@ export const updateUser = async (req, res) => {
     user.password = password || user.password;
     user.address = address || user.address;
     user.city = city || user.city;
+    user.state = state || user.state;
+    user.country = country || user.country;
     user.zipcode = zipcode || user.zipcode;
     user.phoneNo = phoneNo || user.phoneNo;
     user.role = role || user.role;

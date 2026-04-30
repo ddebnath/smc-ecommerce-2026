@@ -1,32 +1,42 @@
 import {
   LayoutDashboard,
   ShoppingCart,
-  Users,
-  Package,
   PackagePlus,
   PackageSearch,
 } from "lucide-react";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-const Sidebar = () => {
+const Sidebar1 = () => {
   const menuItems = [
     {
       name: "Dashboard",
-      path: "/dashboard/",
+      path: "/product-owner-dashboard",
       icon: LayoutDashboard,
-      end: true,
+      end: true, // ✅ only exact match
     },
-    { name: "Add Products", path: "/dashboard/add-product", icon: PackagePlus },
-    { name: "Products", path: "/dashboard/products", icon: PackageSearch },
-    { name: "Users", path: "/dashboard/users", icon: Users },
-    { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart },
+    {
+      name: "Add Products",
+      path: "/product-owner-dashboard/add-product",
+      icon: PackagePlus,
+    },
+    {
+      name: "Products",
+      path: "/product-owner-dashboard/products",
+      icon: PackageSearch,
+    },
+    {
+      name: "Orders",
+      path: "/product-owner-dashboard/orders",
+      icon: ShoppingCart,
+    },
   ];
 
   return (
     <div className="hidden md:flex fixed left-0 top-0 h-screen w-[260px] bg-blue-600 text-white shadow-lg flex-col p-6">
       {/* Title */}
-      <div className="text-2xl font-bold mt-20 text-center">Admin Panel</div>
+      <div className="text-2xl font-bold mt-20 text-center">Product Panel</div>
+
       {/* Menu */}
       <nav className="flex flex-col gap-3 mt-10">
         {menuItems.map((item, index) => {
@@ -50,9 +60,9 @@ const Sidebar = () => {
             </NavLink>
           );
         })}
-      </nav>{" "}
+      </nav>
     </div>
   );
 };
 
-export default Sidebar;
+export default Sidebar1;

@@ -37,6 +37,7 @@ const DeliveryAddress = () => {
 
   // ================= DATA =================
   const countries = useMemo(() => Country.getAllCountries(), []);
+  const [selectedCountry, setSelectedCountry] = useState("");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
@@ -44,12 +45,10 @@ const DeliveryAddress = () => {
   const [stateOpen, setStateOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
 
-  const [selectedCountry, setSelectedCountry] = useState("");
-
-  const [addresses, setAddresses] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(undefined);
   const [showForm, setShowForm] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [addresses, setAddresses] = useState([]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -537,6 +536,7 @@ const DeliveryAddress = () => {
                 required
               />
             )}
+
             <textarea
               name="address"
               value={formData.address}

@@ -12,8 +12,15 @@ import { Product } from "../models/product.models.js";
 
 export const addProduct = async (req, res) => {
   try {
-    const { productName, productDesc, productPrice, category, brand } =
-      req.body;
+    const {
+      productName,
+      productDesc,
+      productPrice,
+      category,
+      brand,
+      quantity,
+      sold,
+    } = req.body;
 
     const userId = req.id;
 
@@ -57,6 +64,8 @@ export const addProduct = async (req, res) => {
       productPrice,
       category,
       brand,
+      quantity,
+      sold,
       productImg, //array of objects [{url, public_id},{url, public_id}]
     });
 
@@ -200,6 +209,8 @@ export const updateProduct = async (req, res) => {
       productPrice,
       category,
       brand,
+      quantity,
+      sold,
       existingImages, // public_id(s)
     } = req.body;
 
@@ -273,6 +284,8 @@ export const updateProduct = async (req, res) => {
     product.productPrice = productPrice || product.productPrice;
     product.category = category || product.category;
     product.brand = brand || product.brand;
+    product.quantity = quantity || product.quantity;
+    product.sold = sold || product.sold;
     product.productImg = updatedImages;
 
     const updatedProduct = await product.save();
@@ -287,5 +300,157 @@ export const updateProduct = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+/* 
+add products by the product owner
+
+*/
+
+export const addOwnProduct = async (req, res) => {
+  try {
+    const {
+      productName,
+      productDesc,
+      productPrice,
+      category,
+      brand,
+      quantity,
+      sold,
+    } = req.body;
+
+    const userId = req.id;
+
+    if (!productName || !productDesc || !productPrice || !category || !brand) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
+    }
+    const safeCategory = category
+      ? category.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      : "uncategorized";
+
+    // handle multiple image upload
+    let productImg = [];
+    if (req.files && req.files.length > 0) {
+      for (let file of req.files) {
+        const fileUri = getDataUri(file);
+        const result = await cloudinary.uploader.upload(fileUri, {
+          folder: `products/${safeCategory}/${userId}`, // cloudinary folder to store product images
+          public_id: `${safeCategory}/${userId}/${Date.now()}`,
+        });
+
+        productImg.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "At least 1 image is required" });
+    }
+
+    // create a product in DB
+
+    const newProduct = await Product.create({
+      userId,
+      productName,
+      productDesc,
+      productPrice,
+      category,
+      brand,
+      quantity,
+      sold,
+      productImg, //array of objects [{url, public_id},{url, public_id}]
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "product added successfully",
+      product: newProduct,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/*get products by product owner */
+export const getProductOwnerProduct = async (req, res) => {
+  try {
+    const userId = req.id;
+
+    const products = await Product.find({ owner: userId });
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No products available",
+        products: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Products fetched successfully",
+      products,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/* delete product by owner */
+
+export const deleteOwnProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    if (!productId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required" });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    const safeCategory = product.category
+      ? product.category.toLowerCase().replace(/[^a-z0-9]/g, "-")
+      : "uncategorized";
+
+    // ✅ delete all images
+
+    for (let img of product.productImg) {
+      await cloudinary.uploader.destroy(img.public_id);
+    }
+
+    const folderPath = `products/${safeCategory}/${product._id}`;
+
+    // ✅ delete folder (only if empty)
+    try {
+      await cloudinary.api.delete_folder(folderPath);
+    } catch (error) {
+      console.error("Folder not empty or not found");
+    }
+
+    // ✅ delete product from DB
+    await product.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

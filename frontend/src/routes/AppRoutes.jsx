@@ -26,7 +26,11 @@ import ShowSingleUserOrders from "../pages/ShowSingleUserOrders";
 import Logout from "../pages/Auth/Logout";
 import AdminDashBoard from "@/pages/AdminPages/AdminDashBoard";
 import CashOnDelivery from "@/pages/payment/CashOnDelevery";
-
+import ProductAllProduct from "@/pages/ProductAdminPages/ProductAllProduct";
+import ProductAddProduct from "@/pages/ProductAdminPages/ProductAddProduct";
+import ProductOrdersProduct from "@/pages/ProductAdminPages/ProductOrdersProduct";
+import ProductPanel from "@/pages/Dashboard/ProductPanel";
+import ProductDashBoard from "@/pages/ProductAdminPages/ProductDashBoard";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -109,13 +113,28 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="sales" element={<AdminDashBoard />} />
+        <Route index element={<AdminDashBoard />} />
         <Route path="add-product" element={<AddProduct />} />
         <Route path="products" element={<AdminProduct />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="users/:id" element={<UserInfo />} />
         <Route path="users/orders/:userId" element={<ShowSingleUserOrders />} />
+      </Route>
+
+      {/* Product Ownder */}
+      <Route
+        path="/product-owner-dashboard"
+        element={
+          <ProtectedRoute productOwner={true}>
+            <ProductPanel />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<ProductDashBoard />} />
+        <Route path="add-product" element={<ProductAddProduct />} />
+        <Route path="products" element={<ProductAllProduct />} />
+        <Route path="orders" element={<ProductOrdersProduct />} />
       </Route>
     </Routes>
   );

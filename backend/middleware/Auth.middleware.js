@@ -77,3 +77,12 @@ export const isAdmin = async (req, res, next) => {
     return res.status(403).json({ success: false, message: "access denied" });
   }
 };
+
+/* middleware for product owner */
+export const isProductOwner = async (req, res, next) => {
+  if (req.user && req.user.role === "productOwner") {
+    next();
+  } else {
+    return res.status(403).json({ success: false, message: "access denied" });
+  }
+};

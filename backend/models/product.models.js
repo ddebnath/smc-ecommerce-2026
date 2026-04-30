@@ -42,6 +42,23 @@ const productSchema = new mongoose.Schema(
         return this.userId;
       },
     },
+    quantity: {
+      type: Number,
+      default: 10,
+      min: [1, "Quantity must be greater than 0"],
+    },
+
+    sold: {
+      type: Number,
+      default: 0,
+      min: [0, "Sold cannot be negative"],
+      validate: {
+        validator: function (value) {
+          return value <= this.quantity;
+        },
+        message: "Sold cannot be greater than quantity",
+      },
+    },
   },
   { timestamps: true },
 );

@@ -21,6 +21,8 @@ const userSchema = new Schema(
     otpExpiry: { type: Date, default: null },
     address: { type: String },
     city: { type: String },
+    country: { type: String, default: "India" }, // country field
+    state: { type: String }, // state field
     zipcode: { type: String },
     phoneNo: { type: String },
   },

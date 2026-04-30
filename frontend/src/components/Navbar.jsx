@@ -11,6 +11,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   const admin = user?.role === "admin";
+  const productOwner = user?.role === "productOwner";
 
   const totalNumberOfItems = user
     ? (cart?.items || []).reduce((acc, item) => acc + (item?.quantity ?? 0), 0)
@@ -81,6 +82,15 @@ const Navbar = () => {
             {admin && (
               <Link
                 to="/dashboard"
+                className="text-gray-700 hover:text-blue-600"
+              >
+                Dashboard
+              </Link>
+            )}
+
+            {productOwner && (
+              <Link
+                to="/product-owner-dashboard"
                 className="text-gray-700 hover:text-blue-600"
               >
                 Dashboard
