@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import menu_foodprocessing from "@/assets/Menu_Food Processing.png";
 
 const products = [
   "https://images.unsplash.com/photo-1509440159596-0249088772ff", // bread
