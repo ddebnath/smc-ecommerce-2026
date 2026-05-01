@@ -79,7 +79,7 @@ const Events = () => {
             🎉 Events Dashboard
           </h1>
 
-          <Link to={`${getDashboardPath(user.role)}/events/create`}>
+          <Link to={`${getDashboardPath(user?.role)}/events/create`}>
             <Button className="bg-blue-600 hover:bg-blue-700">
               + Create Event
             </Button>

@@ -33,8 +33,8 @@ import ProductPanel from "@/pages/Dashboard/ProductPanel";
 import ProductDashBoard from "@/pages/ProductAdminPages/ProductDashBoard";
 import ImageGallery from "@/pages/ImageGallery/ImageGallery";
 import CreateEvent from "@/pages/EventPages/CreateEvent";
-import Events from "@/pages/EventPages/Events";
 import EventDetails from "@/pages/EventPages/EventDetails";
+import Events from "@/pages/EventPages/Events";
 
 const AppRoutes = () => {
   const images = [
@@ -127,7 +127,8 @@ const AppRoutes = () => {
       {/* Public Layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-
+        <Route path="/product" element={<Product />} />
+        <Route path="/event" element={<Events />} />
         <Route
           path="/profile/:userId"
           element={
@@ -136,9 +137,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
-        <Route path="/product" element={<Product />} />
-        <Route path="/event" element={<Events />} />
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/product/:id" element={<SingleProduct />} />
 
@@ -232,8 +230,6 @@ const AppRoutes = () => {
         <Route path="orders" element={<ProductOrdersProduct />} />
 
         {/* Event */}
-
-        <Route path="events/create" element={<CreateEvent />} />
       </Route>
     </Routes>
   );
