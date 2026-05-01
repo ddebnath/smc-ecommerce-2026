@@ -74,8 +74,8 @@ const Events = () => {
     <div className="bg-gray-50 min-h-screen py-10 px-4">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">
+        <div className="flex justify-between items-center mb-25">
+          <h1 className="text-3xl font-bold text-gray-800 ">
             🎉 Events Dashboard
           </h1>
 
@@ -122,7 +122,7 @@ const Events = () => {
 
                 {/* GRADIENT OVERLAY */}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/30 to-transparent" />
 
                 {/* CONTENT */}
                 <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 text-white">
@@ -130,69 +130,71 @@ const Events = () => {
                     {/* TITLE */}
 
                     <Link to={`/events/${event._id}`}>
-                      <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-                        {event.title}
-                      </h1>
+                      <div className="flex flex-col justify-center text-center items-center gap-3">
+                        <h1 className="sm: text-2xl font-bold leading-tight">
+                          {event.title}
+                        </h1>
+
+                        <div className="flex justify-center items-center">
+                          <Link to={`/events/${event._id}`}>
+                            <span className="text-white text-lg bg-white/15 backdrop-blur px-3 py-1 rounded-full">
+                              Event Gallery
+                            </span>
+                          </Link>
+                        </div>
+                      </div>
                     </Link>
+                  </div>
 
-                    {/* META INFO */}
-                    <div className="mt-5 flex flex-wrap items-center gap-3 text-xs md:text-sm">
-                      <Link to={`/events/${event._id}`}>
-                        <span className="bg-white/15 backdrop-blur px-3 py-1 rounded-full">
-                          📸 Event Gallery
-                        </span>
-                      </Link>
-                      <Link to={`/events/${event._id}`}></Link>
+                  {/* META INFO */}
 
+                  <div className="flex flex-wrap md:text-sm">
+                    {/* 
                       <Link to={`/events/${event._id} flex gap=3`}>
-                        <span className="text-gray-3    00">
-                          Created by:{" "}
+                        <span className="text-gray-300">
+                          Created by:
                           <span className="text-white font-medium">
                             {event.createdBy?.name || "Admin"}
                           </span>
                         </span>
-                      </Link>
+                      </Link> 
+                      */}
 
-                      <CardContent className="p-4 space-y-3">
-                        {/* ACTIONS */}
-                        <div className="flex gap-2 pt-2">
-                          {/* VIEW */}
-                          <Link to={`/events/${event._id}`} className="flex-1">
-                            <Button size="lg" className="w-full">
-                              <Eye size={35} />
-                            </Button>
-                          </Link>
+                    <CardContent className="p-5 space-y-4">
+                      {/* ACTIONS */}
+                      <div className="flex gap-4">
+                        {/* VIEW */}
+                        <Link to={`/events/${event._id}`} className="flex-1">
+                          <Button size="lg" className="w-12">
+                            <Eye size={25} />
+                          </Button>
+                        </Link>
 
-                          {/* EDIT */}
-                          <Link to={``}>
-                            <Button
-                              size="lg"
-                              variant="outline"
-                              className="bg-amber-700"
-                            >
-                              <Pencil
-                                size={35}
-                                fill={100}
-                                className="text-white"
-                              />
-                            </Button>
-                          </Link>
-
-                          {/* DELETE */}
+                        {/* EDIT */}
+                        <Link to={``}>
                           <Button
                             size="lg"
-                            variant="destructive"
-                            onClick={() => handleDelete(event._id)}
+                            variant="outline"
+                            className="bg-amber-700 w-12"
                           >
-                            <Trash2
+                            <Pencil
                               size={35}
                               fill={100}
                               className="text-white"
                             />
                           </Button>
-                        </div>
-                      </CardContent>
-                    </div>
+                        </Link>
+
+                        {/* DELETE */}
+                        <Button
+                          size="lg"
+                          variant="destructive"
+                          onClick={() => handleDelete(event._id)}
+                        >
+                          <Trash2 size={25} fill={100} className="text-white" />
+                        </Button>
+                      </div>
+                    </CardContent>
                   </div>
                 </div>
               </div>
