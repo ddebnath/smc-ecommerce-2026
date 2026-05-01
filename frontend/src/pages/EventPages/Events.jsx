@@ -71,7 +71,7 @@ const Events = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-10 px-4">
+    <div className="bg-gray-50 min-h-screen py-10 px-4 ">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-25">
@@ -81,13 +81,16 @@ const Events = () => {
 
           <Link
             to={
-              (user?.role === "admin" || user?.role === "productOwner") &&
+              ((user && user?.role === "admin") ||
+                (user && user?.role === "productOwner")) &&
               `${getDashboardPath(user?.role)}`
             }
           >
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              + Create Event
-            </Button>
+            {user && user?.role !== "user" && (
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                + Create Event
+              </Button>
+            )}
           </Link>
         </div>
 
@@ -99,13 +102,13 @@ const Events = () => {
         )}
 
         {/* EMPTY */}
-        {!loading && events.length === 0 && (
+        {!loading && events?.length === 0 && (
           <p className="text-center text-gray-500">No events available</p>
         )}
 
         {/* GRID */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {events.map((event) => (
+          {events?.map((event) => (
             <Card
               key={event._id}
               className="overflow-hidden items-center justify-center rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 group bg-white"
@@ -115,8 +118,8 @@ const Events = () => {
                 {/* BACKGROUND IMAGE */}
 
                 <img
-                  src={event.coverImage?.url}
-                  alt={event.title}
+                  src={event?.coverImage?.url}
+                  alt={event?.title}
                   className="w-full h-full object-cover scale-105"
                 />
 
@@ -132,7 +135,7 @@ const Events = () => {
                     <Link to={`/events/${event._id}`}>
                       <div className="flex flex-col justify-center text-center items-center gap-3">
                         <h1 className="sm: text-2xl font-bold leading-tight">
-                          {event.title}
+                          {event?.title}
                         </h1>
 
                         <div className="flex justify-center items-center">
@@ -149,28 +152,10 @@ const Events = () => {
                   {/* META INFO */}
 
                   <div className="flex flex-wrap md:text-sm">
-                    {/* 
-                      <Link to={`/events/${event._id} flex gap=3`}>
-                        <span className="text-gray-300">
-                          Created by:
-                          <span className="text-white font-medium">
-                            {event.createdBy?.name || "Admin"}
-                          </span>
-                        </span>
-                      </Link> 
-                      */}
-
-                    <CardContent className="p-5 space-y-4">
+                    <CardContent className="p-5 flex items-center justify-center gap-4">
                       {/* ACTIONS */}
-                      <div className="flex gap-4">
-                        {/* VIEW */}
-                        <Link to={`/events/${event._id}`} className="flex-1">
-                          <Button size="lg" className="w-12">
-                            <Eye size={25} />
-                          </Button>
-                        </Link>
-
-                        {/* EDIT */}
+                      {/* EDIT */}
+                      {user && user?.role !== "user" && (
                         <Link to={``}>
                           <Button
                             size="lg"
@@ -184,16 +169,26 @@ const Events = () => {
                             />
                           </Button>
                         </Link>
+                      )}
 
-                        {/* DELETE */}
+                      {/* VIEW */}
+                      <Link to={`/events/${event._id}`} className="flex-1">
+                        <Button size="lg" className="w-12">
+                          <Eye size={25} />
+                        </Button>
+                      </Link>
+
+                      {/* DELETE */}
+
+                      {user && user?.role !== "user" && (
                         <Button
-                          size="lg"
+                          className="bg-white"
                           variant="destructive"
                           onClick={() => handleDelete(event._id)}
                         >
-                          <Trash2 size={25} fill={100} className="text-white" />
+                          <Trash2 size={40} fill={10} className="text-white" />
                         </Button>
-                      </div>
+                      )}
                     </CardContent>
                   </div>
                 </div>

@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
+const format = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
 const FilterSideBar = ({
   allProducts,
   search,
@@ -19,36 +21,48 @@ const FilterSideBar = ({
   setBrand,
   category,
   setCategory,
-  sortOrder,
   setSortOrder,
 }) => {
-  // ===== UNIQUE VALUES =====
   const uniqueCategory = useMemo(() => {
-    const cats = allProducts.map((p) => p.category);
-    return ["All", ...new Set(cats)];
+    return [
+      "all",
+      ...Array.from(
+        new Set(
+          allProducts
+            .map((p) => p.category?.trim().toLowerCase())
+            .filter(Boolean),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    ];
   }, [allProducts]);
 
   const uniqueBrand = useMemo(() => {
-    const brands = allProducts.map((p) => p.brand);
-    return ["All", ...new Set(brands)];
+    return [
+      "all",
+      ...Array.from(
+        new Set(
+          allProducts.map((p) => p.brand?.trim().toLowerCase()).filter(Boolean),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    ];
   }, [allProducts]);
 
   const resetFilters = () => {
     setSearch("");
-    setBrand("All");
-    setCategory("All");
-    setSortOrder("");
+    setBrand("all");
+    setCategory("all");
+    setSortOrder("categoryAZ");
   };
 
   return (
-    <div className="hidden md:block w-72 sticky top-24">
+    <div className="hidden md:block w-65 sticky top-30">
       <Card className="shadow-md rounded-2xl">
         <CardHeader>
           <CardTitle className="text-lg">Filters</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* 🔍 SEARCH */}
+          {/* SEARCH */}
           <div>
             <label className="text-sm font-medium mb-2 block">Search</label>
             <Input
@@ -58,30 +72,29 @@ const FilterSideBar = ({
             />
           </div>
 
-          {/* 📂 CATEGORY */}
+          {/* CATEGORY */}
           <div>
             <label className="text-sm font-medium mb-2 block">Category</label>
-
             <div className="flex flex-wrap gap-2">
               {uniqueCategory.map((item) => (
                 <button
                   key={item}
                   onClick={() => setCategory(item)}
-                  className={`px-3 py-1 text-sm rounded-full border ${
+                  className={`px-3 py-1 text-sm rounded-full border transition ${
                     category === item
                       ? "bg-blue-600 text-white"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                 >
-                  {item}
+                  {format(item)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* 🏷️ BRAND */}
+          {/* BRAND */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Brand</label>
+            <label className="text-sm font-medium mb-2  block">Brand</label>
 
             <Select value={brand} onValueChange={setBrand}>
               <SelectTrigger>
@@ -92,7 +105,7 @@ const FilterSideBar = ({
                 <SelectGroup>
                   {uniqueBrand.map((item) => (
                     <SelectItem key={item} value={item}>
-                      {item}
+                      {format(item)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -100,7 +113,7 @@ const FilterSideBar = ({
             </Select>
           </div>
 
-          {/* 🔄 RESET */}
+          {/* RESET */}
           <Button variant="outline" className="w-full" onClick={resetFilters}>
             Reset Filters
           </Button>

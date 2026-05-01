@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import { API_URL } from "@/config/api.js";
 import { toast } from "sonner";
@@ -15,6 +16,10 @@ const ProductCard = ({ product = {}, loading }) => {
   const navigate = useNavigate();
 
   const [adding, setAdding] = useState(false);
+
+  // ⭐ rating state
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
 
   const accessToken = localStorage.getItem("accessToken");
 
@@ -30,7 +35,7 @@ const ProductCard = ({ product = {}, loading }) => {
 
   const addToCart = async () => {
     if (!user) {
-      navigate("/auth/login ", { state: { loginStatus: "login_first" } });
+      navigate("/auth/login", { state: { loginStatus: "login_first" } });
       return;
     }
 
@@ -46,7 +51,7 @@ const ProductCard = ({ product = {}, loading }) => {
       );
 
       if (res.data.success) {
-        toast.success("Product added to cart");
+        toast.success("Added to cart");
         dispatch(setCart(res.data.cart));
       }
     } catch (error) {
@@ -57,48 +62,79 @@ const ProductCard = ({ product = {}, loading }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
-      {/* Image */}
-      <div className="aspect-square overflow-hidden">
+    <div className="group bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+      {/* IMAGE */}
+      <div className="relative aspect-square overflow-hidden">
         {loading ? (
           <Skeleton className="w-full h-full" />
         ) : (
-          <img
-            src={imageUrl}
-            alt={productName}
-            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-            onClick={() => navigate(`/product/${_id}`)}
-          />
+          <>
+            <img
+              src={imageUrl}
+              alt={productName}
+              onClick={() => navigate(`/product/${_id}`)}
+              className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300"
+            />
+            <Badge className="absolute top-2 left-2 bg-black/70 text-white text-xs">
+              New
+            </Badge>
+          </>
         )}
       </div>
 
-      {/* Content */}
+      {/* CONTENT */}
       {loading ? (
-        <div className="p-3 space-y-2">
+        <div className="p-4 space-y-3">
           <Skeleton className="w-full h-4" />
           <Skeleton className="w-1/2 h-4" />
-          <Skeleton className="w-full h-8" />
+          <Skeleton className="w-full h-10" />
         </div>
       ) : (
-        <div className="p-3 space-y-2">
-          <h1 className="text-sm font-medium line-clamp-2 text-gray-700 min-h-[40px]">
+        <div className="p-4 space-y-3">
+          {/* NAME */}
+          <h2 className="text-sm font-medium text-gray-800 line-clamp-2 min-h-[40px]">
             {productName}
-          </h1>
-
-          <h2 className="font-semibold text-lg text-gray-900">
-            ₹ {productPrice}
           </h2>
 
+          {/* ⭐ INTERACTIVE RATING */}
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, index) => {
+              const starValue = index + 1;
+
+              return (
+                <Star
+                  key={index}
+                  size={18}
+                  className={`cursor-pointer transition ${
+                    starValue <= (hover || rating)
+                      ? "fill-yellow-500 text-yellow-500"
+                      : "text-gray-300"
+                  }`}
+                  onClick={() => setRating(starValue)}
+                  onMouseEnter={() => setHover(starValue)}
+                  onMouseLeave={() => setHover(0)}
+                />
+              );
+            })}
+            <span className="text-xs text-gray-500 ml-2">
+              {rating ? `${rating}/5` : "Rate"}
+            </span>
+          </div>
+
+          {/* PRICE */}
+          <p className="text-lg font-semibold text-gray-900">₹{productPrice}</p>
+
+          {/* BUTTON */}
           <Button
             disabled={adding}
             onClick={addToCart}
-            className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
+            className="w-full rounded-xl flex items-center justify-center gap-2"
           >
             {adding ? (
               "Adding..."
             ) : (
               <>
-                <ShoppingCart size={18} />
+                <ShoppingCart size={16} />
                 Add to Cart
               </>
             )}
