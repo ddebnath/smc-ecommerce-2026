@@ -228,6 +228,7 @@ const AppRoutes = () => {
         <Route path="add-product" element={<ProductAddProduct />} />
         <Route path="products" element={<ProductAllProduct />} />
         <Route path="orders" element={<ProductOrdersProduct />} />
+        <Route path="events/create" element={<CreateEvent />} />
 
         {/* Event */}
       </Route>
