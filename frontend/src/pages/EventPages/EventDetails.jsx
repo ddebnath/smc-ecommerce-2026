@@ -132,14 +132,61 @@ const EventDetails = () => {
         </div>
       </div>
 
-      {/* DESCRIPTION */}
-      <Card>
-        <CardContent className="p-6">
-          <h2 className="text-lg font-semibold mb-2">About this event</h2>
+      {/* EVENT INFO */}
 
-          <p className="text-gray-600 leading-relaxed">{event.description}</p>
-        </CardContent>
-      </Card>
+      <h2 className="text-lg font-semibold mb-2">Event Details</h2>
+      {/* LOCATION BLOCK */}
+      <div className="grid md:grid-cols-2 gap-2 text-gray-700">
+        <Card className="">
+          <h3 className="text-lg font-semibold ml-5">Location</h3>
+          <CardContent>
+            <div className="text-gray-700 ">
+              {/* DATE */}
+              <p className="text-gray-700">
+                <span className="font-medium">Date:</span>{" "}
+                {event.date
+                  ? new Date(event.date).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "Not specified"}
+              </p>
+              <p>
+                <span className="font-medium">Address:</span>{" "}
+                {event?.address || "N/A"}
+              </p>
+
+              <p>
+                <span className="font-medium">City:</span>{" "}
+                {event?.city || "N/A"}
+              </p>
+
+              <p>
+                <span className="font-medium">State:</span>{" "}
+                {event?.state || "N/A"}
+              </p>
+
+              <p>
+                <span className="font-medium">Country:</span>{" "}
+                {event?.country || "N/A"}
+              </p>
+
+              <p>
+                <span className="font-medium">Pin Code:</span>{" "}
+                {event?.pinCode || "N/A"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+        {/* DESCRIPTION */}
+        <Card className="">
+          <CardContent className="Description">
+            <p className="font-bold">Description</p>
+            <p className="text-gray-600 leading-relaxed">{event.description}</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

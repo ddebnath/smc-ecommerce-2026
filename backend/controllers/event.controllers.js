@@ -21,7 +21,16 @@ const uploadToCloudinary = async (fileBuffer) => {
 // CREATE EVENT (with optional cover image)
 export const createEvent = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const {
+      title,
+      description,
+      date,
+      location,
+      city,
+      state,
+      country,
+      pinCode,
+    } = req.body;
 
     let coverImage = {
       url: "",
@@ -50,6 +59,12 @@ export const createEvent = async (req, res) => {
     const event = await Event.create({
       title,
       description,
+      date,
+      location,
+      city,
+      state,
+      country,
+      pinCode,
       createdBy: req.user._id,
       coverImage,
     });
