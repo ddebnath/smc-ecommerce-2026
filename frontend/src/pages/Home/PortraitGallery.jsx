@@ -7,40 +7,46 @@ import menu4 from "@/assets/menu4.jpeg";
 import menu5 from "@/assets/menu5.jpeg";
 import menu6 from "@/assets/menu6.jpeg";
 import menu7 from "@/assets/menu7.jpeg";
+import cover from "@/assets/VTCGALA2026.jpg";
 const images = [
   {
     id: 1,
-    url: menu1,
+    url: cover,
     title: "Food Processing Menu",
   },
   {
     id: 2,
+    url: menu1,
+    title: "Food Processing Menu",
+  },
+  {
+    id: 3,
     url: menu3,
     title: "Orange Squash - VTC-Food Processing",
   },
   {
-    id: 3,
+    id: 4,
     url: menu2,
     title: "Baking and Confectionary",
   },
 
   {
-    id: 4,
+    id: 5,
     url: menu4,
     title: "Beauty Care Menu",
   },
   {
-    id: 5,
+    id: 6,
     url: menu5,
     title: "BeepKeeping Stall",
   },
   {
-    id: 6,
+    id: 7,
     url: menu6,
     title: "Drinks",
   },
   {
-    id: 7,
+    id: 8,
     url: menu7,
     title: "Sweet Creations- VTC Food and Beverage",
   },
@@ -94,7 +100,7 @@ const PortraitGallery = () => {
                 >
                   <Card className="overflow-hidden rounded-2xl shadow-xl">
                     <CardContent className="p-0">
-                      <div className="relative aspect-[2/3] min-h-[420px]">
+                      <div className="relative aspect-2/3 min-h-105">
                         {/* Image */}
                         <img
                           src={img.url}
