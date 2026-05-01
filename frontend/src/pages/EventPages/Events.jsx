@@ -108,6 +108,7 @@ const Events = () => {
               {/* start */}
               <div className="relative w-full h-[420px] md:h-[540px] rounded-3xl overflow-hidden shadow-xl">
                 {/* BACKGROUND IMAGE */}
+
                 <img
                   src={event.coverImage?.url}
                   alt={event.title}
@@ -121,6 +122,7 @@ const Events = () => {
                 <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 text-white">
                   <div className="max-w-4xl">
                     {/* TITLE */}
+
                     <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                       {event.title}
                     </h1>
