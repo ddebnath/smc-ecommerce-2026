@@ -4,7 +4,8 @@ import menu1 from "@/assets/menu1.png";
 import menu3 from "@/assets/menu3.jpeg";
 import menu2 from "@/assets/menu2.jpeg";
 import menu4 from "@/assets/menu4.jpeg";
-
+import menu5 from "@/assets/menu5.jpeg";
+import menu6 from "@/assets/menu6.jpeg";
 const images = [
   {
     id: 1,
@@ -27,12 +28,16 @@ const images = [
     url: menu4,
     title: "Beauty Care Menu",
   },
-
-  //   {
-  //     id: 5,
-  //     url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-  //     title: "Portrait 5",
-  //   },
+  {
+    id: 5,
+    url: menu5,
+    title: "BeepKeeping Stall",
+  },
+  {
+    id: 6,
+    url: menu6,
+    title: "Drinks",
+  },
 ];
 
 // 👉 group images into pairs
@@ -70,7 +75,7 @@ const PortraitGallery = () => {
           return (
             <div
               key={i}
-              className={`min-w-full flex justify-center gap-8 px-4 transition-all duration-700
+              className={`min-w-full flex justify-center gap-20 px-4 transition-all duration-700
                 ${isActive ? "opacity-100 scale-100" : "opacity-40 scale-90 blur-sm"}
               `}
             >

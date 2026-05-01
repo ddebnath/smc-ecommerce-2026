@@ -43,11 +43,11 @@ function Hero() {
           <img
             src={slide.img}
             alt="hero"
-            className="w-full h-full object-cover scale-105 animate-[zoom_6s_linear_infinite]"
+            className="w-full h-full object-cover scale-105 animate-[zoom_6s_linear_infinite] brightness-50"
           />
 
           {/* Strong fade overlay */}
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         </div>
       ))}
 

@@ -43,7 +43,7 @@ export default function Hero() {
       </div>
 
       {/* RIGHT SIDE */}
-      <div className="relative w-full h-[300px] md:h-[384px] overflow-hidden rounded-xl shadow-md">
+      <div className="relative w-full h-75 md:h-96 overflow-hidden rounded-xl shadow-md">
         {products.map((img, index) => (
           <img
             key={index}

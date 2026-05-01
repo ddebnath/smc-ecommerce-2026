@@ -26,7 +26,7 @@ const Navbar = () => {
     : 0;
 
   const navLinkClass = ({ isActive }) =>
-    `text-sm font-medium transition ${
+    `text-base font-medium transition ${
       isActive ? "text-blue-600" : "text-gray-700 hover:text-blue-600"
     }`;
 
