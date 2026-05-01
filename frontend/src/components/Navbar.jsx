@@ -48,8 +48,8 @@ const Navbar = () => {
             Products
           </NavLink>
 
-          <NavLink to="/gallery" className={navLinkClass}>
-            Gallery
+          <NavLink to="/event" className={navLinkClass}>
+            Events
           </NavLink>
 
           {user && (

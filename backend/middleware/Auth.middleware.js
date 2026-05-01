@@ -21,10 +21,17 @@ export const isAuthenticated = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader) {
       return res.status(400).json({
         success: false,
-        message: "authorization token is missing or invalid",
+        message: "authorization token is missing",
+      });
+    }
+
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(400).json({
+        success: false,
+        message: "authorization token invalid",
       });
     }
 

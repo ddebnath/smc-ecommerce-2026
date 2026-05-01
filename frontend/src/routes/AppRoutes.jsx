@@ -32,6 +32,9 @@ import ProductOrdersProduct from "@/pages/ProductAdminPages/ProductOrdersProduct
 import ProductPanel from "@/pages/Dashboard/ProductPanel";
 import ProductDashBoard from "@/pages/ProductAdminPages/ProductDashBoard";
 import ImageGallery from "@/pages/ImageGallery/ImageGallery";
+import CreateEvent from "@/pages/EventPages/CreateEvent";
+import Events from "@/pages/EventPages/Events";
+import EventDetails from "@/pages/EventPages/EventDetails";
 
 const AppRoutes = () => {
   const images = [
@@ -113,11 +116,12 @@ const AppRoutes = () => {
       url: "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=500&auto=format&fit=crop",
       category: "Bakery",
     },
-    // {
-    //   url: "https://images.unsplash.com/photo-1587731608655-8c64b0f6c0d4?w=500&auto=format&fit=crop",
-    //   category: "Bakery",
-    // },
+    {
+      url: "https://images.unsplash.com/photo-1587731608655-8c64b0f6c0d4?w=500&auto=format&fit=crop",
+      category: "Bakery",
+    },
   ];
+
   return (
     <Routes>
       {/* Public Layout */}
@@ -134,7 +138,8 @@ const AppRoutes = () => {
         />
 
         <Route path="/product" element={<Product />} />
-        <Route path="/gallery" element={<ImageGallery images={images} />} />
+        <Route path="/event" element={<Events />} />
+        <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/product/:id" element={<SingleProduct />} />
 
         <Route
@@ -207,6 +212,10 @@ const AppRoutes = () => {
         <Route path="users" element={<AdminUsers />} />
         <Route path="users/:id" element={<UserInfo />} />
         <Route path="users/orders/:userId" element={<ShowSingleUserOrders />} />
+
+        {/* Event */}
+        <Route path="events/create" element={<CreateEvent />} />
+        <Route path="events/create" element={<CreateEvent />} />
       </Route>
 
       {/* Product Ownder */}
@@ -222,6 +231,10 @@ const AppRoutes = () => {
         <Route path="add-product" element={<ProductAddProduct />} />
         <Route path="products" element={<ProductAllProduct />} />
         <Route path="orders" element={<ProductOrdersProduct />} />
+
+        {/* Event */}
+
+        <Route path="events/create" element={<CreateEvent />} />
       </Route>
     </Routes>
   );
