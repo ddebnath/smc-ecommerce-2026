@@ -33,7 +33,7 @@ router.post(
 );
 
 router.get("/get", getAllEvents);
-router.get("/:id", isAuthenticated, getEventById);
+router.get("/:id", getEventById);
 
 // delete event by id
 router.delete(
