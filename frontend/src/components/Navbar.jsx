@@ -48,10 +48,6 @@ const Navbar = () => {
             Products
           </NavLink>
 
-          <NavLink to="/event" className={navLinkClass}>
-            Event Gallery
-          </NavLink>
-
           {user && (
             <NavLink
               to={`/show-user-orders/${user._id}`}
@@ -60,6 +56,9 @@ const Navbar = () => {
               Orders
             </NavLink>
           )}
+          <NavLink to="/event" className={navLinkClass}>
+            Event Gallery
+          </NavLink>
         </div>
 
         {/* RIGHT SECTION */}
