@@ -12,7 +12,7 @@ const images = [
   {
     id: 1,
     url: cover,
-    title: "Food Processing Menu",
+    title: "Cover Image",
   },
   {
     id: 2,
