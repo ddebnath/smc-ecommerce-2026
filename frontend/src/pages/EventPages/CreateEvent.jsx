@@ -239,7 +239,7 @@ const CreateEvent = () => {
             <Input
               name="location"
               placeholder="Location"
-              value={form.location}
+              value={form.address}
               onChange={handleChange}
             />
 

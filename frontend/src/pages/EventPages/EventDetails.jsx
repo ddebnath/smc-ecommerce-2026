@@ -144,8 +144,8 @@ const EventDetails = () => {
               {/* DATE */}
               <p className="text-gray-700">
                 <span className="font-medium">Date:</span>{" "}
-                {event.date
-                  ? new Date(event.date).toLocaleDateString("en-IN", {
+                {event?.date
+                  ? new Date(event?.date).toLocaleDateString("en-IN", {
                       day: "2-digit",
                       month: "long",
                       year: "numeric",
@@ -154,7 +154,7 @@ const EventDetails = () => {
               </p>
               <p>
                 <span className="font-medium">Address:</span>{" "}
-                {event?.address || "N/A"}
+                {event?.location || "N/A"}
               </p>
 
               <p>
