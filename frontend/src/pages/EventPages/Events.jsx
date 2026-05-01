@@ -62,11 +62,11 @@ const Events = () => {
   const getDashboardPath = (role) => {
     switch (role) {
       case "admin":
-        return "/dashboard";
+        return "/dashboard/events/create";
       case "productOwner":
-        return "/product-owner-dashboard";
+        return "/product-owner-dashboard/events/create";
       default:
-        return "/"; // fallback
+        return null;
     }
   };
 
@@ -79,7 +79,12 @@ const Events = () => {
             🎉 Events Dashboard
           </h1>
 
-          <Link to={`${getDashboardPath(user?.role)}/events/create`}>
+          <Link
+            to={
+              (user?.role === "admin" || user?.role === "productOwner") &&
+              `${getDashboardPath(user?.role)}`
+            }
+          >
             <Button className="bg-blue-600 hover:bg-blue-700">
               + Create Event
             </Button>
@@ -116,6 +121,7 @@ const Events = () => {
                 />
 
                 {/* GRADIENT OVERLAY */}
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
                 {/* CONTENT */}
@@ -123,22 +129,30 @@ const Events = () => {
                   <div className="max-w-4xl">
                     {/* TITLE */}
 
-                    <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-                      {event.title}
-                    </h1>
+                    <Link to={`/events/${event._id}`}>
+                      <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+                        {event.title}
+                      </h1>
+                    </Link>
 
                     {/* META INFO */}
                     <div className="mt-5 flex flex-wrap items-center gap-3 text-xs md:text-sm">
-                      <span className="bg-white/15 backdrop-blur px-3 py-1 rounded-full">
-                        📸 Event Gallery
-                      </span>
-
-                      <span className="text-gray-300">
-                        Created by:{" "}
-                        <span className="text-white font-medium">
-                          {event.createdBy?.name || "Admin"}
+                      <Link to={`/events/${event._id}`}>
+                        <span className="bg-white/15 backdrop-blur px-3 py-1 rounded-full">
+                          📸 Event Gallery
                         </span>
-                      </span>
+                      </Link>
+                      <Link to={`/events/${event._id}`}></Link>
+
+                      <Link to={`/events/${event._id} flex gap=3`}>
+                        <span className="text-gray-3    00">
+                          Created by:{" "}
+                          <span className="text-white font-medium">
+                            {event.createdBy?.name || "Admin"}
+                          </span>
+                        </span>
+                      </Link>
+
                       <CardContent className="p-4 space-y-3">
                         {/* ACTIONS */}
                         <div className="flex gap-2 pt-2">
