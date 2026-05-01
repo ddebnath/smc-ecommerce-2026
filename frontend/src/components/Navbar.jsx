@@ -49,7 +49,7 @@ const Navbar = () => {
           </NavLink>
 
           <NavLink to="/event" className={navLinkClass}>
-            Events
+            Event Gallery
           </NavLink>
 
           {user && (

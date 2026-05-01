@@ -16,6 +16,44 @@ const eventSchema = new mongoose.Schema(
       url: String,
       public_id: String,
     },
+
+    date: {
+      type: Date,
+      required: true,
+    },
+
+    location: {
+      address: {
+        type: String,
+        default: "",
+      },
+
+      city: {
+        type: String,
+        default: "",
+      },
+
+      state: {
+        type: String,
+        default: "",
+      },
+
+      country: {
+        type: String,
+        default: "India",
+      },
+
+      pinCode: {
+        type: String,
+        default: "",
+      },
+
+      geoLocation: {
+        lat: { type: Number, default: 0 },
+        lng: { type: Number, default: 0 },
+      },
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
