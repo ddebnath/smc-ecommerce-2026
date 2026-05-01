@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/config/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import store from "@/redux/store";
 
 const Events = () => {
+  const navigate = useNavigate();
   const accessToken = localStorage.getItem("accessToken");
   const { user } = useSelector((store) => store.user);
 
@@ -61,7 +62,6 @@ const Events = () => {
   const getDashboardPath = (role) => {
     if (role === "admin") return "/dashboard";
     if (role === "productOwner") return "/product-owner-dashboard";
-    return "/";
   };
 
   return (

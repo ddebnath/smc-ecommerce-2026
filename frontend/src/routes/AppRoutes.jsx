@@ -215,7 +215,6 @@ const AppRoutes = () => {
 
         {/* Event */}
         <Route path="events/create" element={<CreateEvent />} />
-        <Route path="events/create" element={<CreateEvent />} />
       </Route>
 
       {/* Product Ownder */}
