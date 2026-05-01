@@ -6,6 +6,7 @@ import menu2 from "@/assets/menu2.jpeg";
 import menu4 from "@/assets/menu4.jpeg";
 import menu5 from "@/assets/menu5.jpeg";
 import menu6 from "@/assets/menu6.jpeg";
+import menu7 from "@/assets/menu7.jpeg";
 const images = [
   {
     id: 1,
@@ -37,6 +38,11 @@ const images = [
     id: 6,
     url: menu6,
     title: "Drinks",
+  },
+  {
+    id: 7,
+    url: menu7,
+    title: "Sweet Creations- VTC Food and Beverage",
   },
 ];
 

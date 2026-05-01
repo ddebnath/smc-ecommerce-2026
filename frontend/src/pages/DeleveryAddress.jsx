@@ -616,14 +616,14 @@ const DeliveryAddress = () => {
             Cash on Delivery
           </label>
 
-          <label className="flex gap-2 text-sm">
+          {/* <label className="flex gap-2 text-sm">
             <input
               type="radio"
               checked={paymentMethod === "UPI"}
               onChange={() => setPaymentMethod("UPI")}
             />
             UPI / Wallet
-          </label>
+          </label> */}
 
           <label className="flex gap-2 text-sm">
             <input
@@ -631,7 +631,7 @@ const DeliveryAddress = () => {
               checked={paymentMethod === "CARD"}
               onChange={() => setPaymentMethod("CARD")}
             />
-            Credit / Debit Card
+            Credit / Debit Card / UPI / Wallet
           </label>
         </div>
 

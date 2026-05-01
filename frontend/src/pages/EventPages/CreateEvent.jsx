@@ -211,13 +211,13 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4">
+    <div className="max-w-2xl mx-auto py-10 px-4 bg-gray-100 rounded-lg">
       <Card className="shadow-xl rounded-2xl">
         <CardHeader>
-          <CardTitle>Create Event ({role})</CardTitle>
+          <CardTitle className="text-center">Create Event ({role})</CardTitle>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* TITLE */}
             <Input
@@ -348,7 +348,12 @@ const CreateEvent = () => {
             />
 
             {/* COVER IMAGE */}
-            <Input type="file" accept="image/*" onChange={handleCoverChange} />
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleCoverChange}
+              className="p-3 mb-2"
+            />
 
             {/* GALLERY */}
             <Input
@@ -356,6 +361,7 @@ const CreateEvent = () => {
               accept="image/*"
               multiple
               onChange={handleGalleryChange}
+              className="my-5 "
             />
 
             {/* ROLE INFO */}
