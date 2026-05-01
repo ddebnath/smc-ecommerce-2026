@@ -32,7 +32,7 @@ router.post(
   uploadEventImages,
 );
 
-router.get("/get", isAuthenticated, getAllEvents);
+router.get("/get", getAllEvents);
 router.get("/:id", isAuthenticated, getEventById);
 
 // delete event by id

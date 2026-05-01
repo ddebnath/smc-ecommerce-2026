@@ -60,8 +60,14 @@ const Events = () => {
   };
 
   const getDashboardPath = (role) => {
-    if (role === "admin") return "/dashboard";
-    if (role === "productOwner") return "/product-owner-dashboard";
+    switch (role) {
+      case "admin":
+        return "/dashboard";
+      case "productOwner":
+        return "/product-owner-dashboard";
+      default:
+        return "/"; // fallback
+    }
   };
 
   return (
