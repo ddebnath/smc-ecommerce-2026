@@ -3,348 +3,559 @@ import cloudinary from "../Utils/cloudinary.js";
 import { Event } from "../models/event.models.js";
 import { Gallery } from "../models/gallery.models.js";
 import { safeDestroy } from "../Utils/cloudinaryUtils.js";
+import { TEMP_CHUNKS_DIR } from "../config/storagePaths.js";
+import { UPLOAD_CONFIG } from "../config/uploadConfig.js";
+import path from "path";
+import fs from "fs-extra";
 
-import "dotenv/config.js";
-
-// helper: upload one file
-const uploadToCloudinary = async (fileBuffer) => {
-  const result = await cloudinary.uploader.upload(fileBuffer, {
-    folder: "events",
-  });
-
-  return {
-    public_id: result.public_id,
-    url: result.secure_url,
-  };
-};
-
-// CREATE EVENT (with optional cover image)
-export const createEvent = async (req, res) => {
+// ===================== GET ALL EVENTS =====================
+export const getAllEvents = async (req, res) => {
   try {
     const {
-      title,
-      description,
-      date,
-      location,
+      page = 1,
+      limit = 10,
+      search = "",
       city,
       state,
       country,
-      pinCode,
-    } = req.body;
+    } = req.query;
 
-    let coverImage = {
-      url: "",
-      public_id: "",
-    };
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
 
-    // ---------------------------
-    // HANDLE SINGLE IMAGE
-    // ---------------------------
-    if (req.file) {
-      const fileUri = getDataUri(req.file);
+    const query = {};
 
-      const result = await cloudinary.uploader.upload(fileUri, {
-        folder: "events/cover",
-      });
+    if (search) query.title = { $regex: search, $options: "i" };
+    if (city) query.city = city;
+    if (state) query.state = state;
+    if (country) query.country = country;
 
-      coverImage = {
-        url: result.secure_url,
-        public_id: result.public_id,
-      };
-    }
+    const skip = (pageNum - 1) * limitNum;
 
-    // ---------------------------
-    // CREATE EVENT
-    // ---------------------------
-    const event = await Event.create({
-      title,
-      description,
-      date,
-      location,
-      city,
-      state,
-      country,
-      pinCode,
-      createdBy: req.user._id,
-      coverImage,
-    });
+    const [events, total] = await Promise.all([
+      Event.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .select("-videos"),
 
-    return res.status(201).json({
+      Event.countDocuments(query),
+    ]);
+
+    res.json({
       success: true,
-      data: event,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+      totalEvents: total,
+      data: events,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Event creation failed",
-    });
-  }
-};
-
-// Upload Images Under Event
-
-export const uploadEventImages = async (req, res) => {
-  try {
-    const { eventId } = req.params;
-
-    console.log(eventId);
-
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "At least one image required",
-      });
-    }
-
-    const uploadedImages = [];
-
-    for (let file of req.files) {
-      const fileUri = getDataUri(file);
-
-      const result = await cloudinary.uploader.upload(fileUri, {
-        folder: `events/${eventId}`,
-      });
-
-      const image = await Gallery.create({
-        eventId,
-        imageUrl: result.secure_url,
-        public_id: result.public_id,
-      });
-
-      uploadedImages.push(image);
-    }
-
-    // ⭐ AUTO SET COVER IMAGE (first upload OR replace existing)
-    const event = await Event.findById(eventId);
-
-    if (!event.coverImage) {
-      event.coverImage = uploadedImages[0].imageUrl;
-      await event.save();
-    }
-
-    res.status(201).json({
-      success: true,
-      message: "Images uploaded successfully",
-      data: uploadedImages,
-    });
-  } catch (error) {
-    console.log(error);
     res.status(500).json({ success: false });
   }
 };
 
-export const getAllEvents = async (req, res) => {
-  try {
-    const events = await Event.find().sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      data: events,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch events",
-    });
-  }
-};
-
-// get event details by id
-
+// ===================== GET EVENT BY ID =====================
 export const getEventById = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // 1. Get event
-    const event = await Event.findById(id).populate(
+    const event = await Event.findById(req.params.id).populate(
       "createdBy",
       "firstName lastName email",
     );
 
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    // 2. Get gallery images
-    const images = await Gallery.find({ eventId: id }).sort({
+    const images = await Gallery.find({ eventId: event._id }).sort({
       createdAt: -1,
     });
 
-    return res.status(200).json({
-      success: true,
-      data: {
-        event,
-        images,
-      },
-    });
-  } catch (error) {
-    console.log("getEventById error:", error);
+    res.json({ success: true, data: { event, images } });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
 
-    return res.status(500).json({
+// ===================== HELPERS =====================
+const findEvent = async (id) => await Event.findById(id);
+
+const uploadImage = async (file, eventId) => {
+  const result = await cloudinary.uploader.upload(getDataUri(file), {
+    folder: `events/images/${eventId}`,
+  });
+
+  return {
+    url: result.secure_url,
+    public_id: result.public_id,
+  };
+};
+
+const fixCover = async (event) => {
+  const images = await Gallery.find({ eventId: event._id });
+
+  if (!images.length) {
+    event.coverImage.url = "";
+    event.coverImage.public_id = "";
+  } else if (!images.some((i) => i.imageUrl === event.coverImage.url)) {
+    event.coverImage.url = images[0].imageUrl;
+  }
+
+  await event.save();
+};
+
+// ===================== CREATE =====================
+export const createEvent = async (req, res) => {
+  try {
+    const event = await Event.create({
+      ...req.body,
+      coverImage: { url: "", public_id: "" },
+      createdBy: req.user._id,
+    });
+
+    res.status(201).json({ success: true, data: event });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+// ===================== UPLOAD IMAGES =====================
+export const uploadEventImages = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    if (!req.files?.length) {
+      return res.status(400).json({ message: "Images required" });
+    }
+
+    const event = await findEvent(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    const images = await Promise.all(
+      req.files.map(async (file) => {
+        const data = await uploadImage(file, eventId);
+
+        return Gallery.create({
+          eventId,
+          imageUrl: data.url,
+          public_id: data.public_id,
+        });
+      }),
+    );
+
+    if (!event.coverImage.url) {
+      event.coverImage.url = images[0].imageUrl;
+      event.coverImage.public_id = images[0].public_id;
+      await event.save();
+    }
+
+    res.status(201).json({ success: true, data: images });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+// ===================== UPDATE EVENT =====================
+export const updateEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { deleteImageIds, setCoverImageId, ...updates } = req.body;
+
+    const event = await findEvent(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    Object.assign(event, updates);
+
+    if (deleteImageIds?.length) {
+      const imgs = await Gallery.find({ _id: { $in: deleteImageIds } });
+
+      await Promise.all(
+        imgs.map((img) => img.public_id && safeDestroy(img.public_id)),
+      );
+
+      await Gallery.deleteMany({ _id: { $in: deleteImageIds } });
+    }
+
+    if (req.files?.length) {
+      for (const file of req.files) {
+        const data = await uploadImage(file, eventId);
+
+        await Gallery.create({
+          eventId,
+          imageUrl: data.url,
+          public_id: data.public_id,
+        });
+
+        if (!event.coverImage) event.coverImage = data.url;
+      }
+    }
+
+    if (setCoverImageId) {
+      const img = await Gallery.findById(setCoverImageId);
+      if (img) event.coverImage = img.imageUrl;
+    }
+
+    await fixCover(event);
+
+    res.json({ success: true, data: event });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+// ============= SAFE VIDEO DESTROY
+export const safeDestroyVideo = async (public_id) => {
+  try {
+    if (!public_id) return;
+
+    await cloudinary.uploader.destroy(public_id, {
+      resource_type: "video",
+    });
+  } catch (err) {
+    console.error("❌ Failed to delete video:", public_id, err.message);
+  }
+};
+// ===================== DELETE EVENT =====================
+export const deleteEvent = async (req, res) => {
+  try {
+    const event = await findEvent(req.params.eventId);
+
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    const images = await Gallery.find({ eventId: event._id });
+
+    if (images) {
+      await Promise.all(
+        images.map((img) => img.public_id && safeDestroy(img.public_id)),
+      );
+      await Gallery.deleteMany({ eventId: event._id });
+    }
+
+    if (event.videos?.length > 0) {
+      await Promise.all(event.videos.map((v) => safeDestroyVideo(v.public_id)));
+    }
+
+    await event.deleteOne();
+
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+// ===================== DELETE IMAGE =====================
+export const deleteEventImage = async (req, res) => {
+  try {
+    const image = await Gallery.findById(req.params.imageId);
+    if (!image) return res.status(404).json({ message: "Image not found" });
+
+    const event = await findEvent(image.eventId);
+
+    if (image.public_id) await safeDestroy(image.public_id);
+
+    await image.deleteOne();
+    await fixCover(event);
+
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+// ===================== SET COVER =====================
+export const setCoverImage = async (req, res) => {
+  try {
+    const image = await Gallery.findById(req.params.imageId);
+    if (!image) return res.status(404).json({ message: "Image not found" });
+
+    const event = await findEvent(image.eventId);
+    event.coverImage = image.imageUrl;
+    await event.save();
+
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+const uploadVideo = async (file, eventId) => {
+  const result = await cloudinary.uploader.upload(getDataUri(file), {
+    resource_type: "video",
+    folder: `events/videos/${eventId}`,
+  });
+
+  return {
+    url: result.secure_url,
+    public_id: result.public_id,
+    duration: result.duration,
+    format: result.format,
+    size: result.bytes,
+    thumbnail: cloudinary.url(result.public_id, {
+      resource_type: "video",
+      format: "jpg",
+      transformation: [
+        { width: 400, height: 300, crop: "fill" },
+        { quality: "auto" },
+        { start_offset: "auto" }, // 🎯 Cloudinary picks best frame
+      ],
+    }),
+  };
+};
+
+// ===================== VIDEOS =====================
+export const uploadEventVideos = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    // ✅ 1. FIND EVENT
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // ✅ 2. VALIDATE FILES
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No videos uploaded" });
+    }
+
+    // ✅ 3. ENSURE ARRAY EXISTS
+    event.videos = event.videos || [];
+
+    // ✅ 4. LIMIT CHECK
+    const MAX_VIDEOS = 2;
+    if (
+      event.videos.length + req.files.length >
+      UPLOAD_CONFIG.VIDEO.MAX_COUNT
+    ) {
+      return res.status(400).json({
+        message: `Max ${UPLOAD_CONFIG.VIDEO.MAX_COUNT} videos allowed`,
+      });
+    }
+
+    // ✅ 5. UPLOAD VIDEOS (CLOUDINARY)
+    const uploadedVideos = await Promise.all(
+      req.files.map(async (file) => {
+        const result = await cloudinary.uploader.upload(
+          file.path || file, // supports both disk + memory
+          {
+            resource_type: "video",
+            folder: `events/videos/${eventId}`,
+          },
+        );
+
+        return {
+          url: result.secure_url,
+          public_id: result.public_id,
+          duration: result.duration,
+          format: result.format,
+          size: result.bytes,
+          thumbnail: cloudinary.url(result.public_id, {
+            resource_type: "video",
+            format: "jpg",
+            transformation: [
+              { width: 400, height: 300, crop: "fill" },
+              { quality: "auto" },
+              { start_offset: "auto" },
+            ],
+          }),
+        };
+      }),
+    );
+
+    // ✅ 6. PREVENT DUPLICATES (OPTIONAL SAFETY)
+    const uniqueVideos = uploadedVideos.filter(
+      (newVid) => !event.videos.some((existing) => existing.url === newVid.url),
+    );
+
+    // ✅ 7. SAVE
+    event.videos.push(...uniqueVideos);
+    await event.save();
+
+    res.json({
+      success: true,
+      count: uniqueVideos.length,
+      data: uniqueVideos,
+    });
+  } catch (err) {
+    console.error("❌ Upload video error:", err);
+
+    res.status(500).json({
       success: false,
-      message: "Failed to fetch event details",
+      message: "Video upload failed",
+      error: err.message,
     });
   }
 };
 
-// get images
-export const getEventImages = async (req, res) => {
-  const { eventId } = req.params;
+// delete event videos
+export const deleteEventVideo = async (req, res) => {
+  try {
+    const event = await findEvent(req.params.eventId);
 
-  const images = await Gallery.find({
-    eventId,
-    isActive: true,
-  });
+    const video = event?.videos?.id(req.params.videoId);
+    if (!video) return res.status(404).json({ message: "Video not found" });
 
-  res.json({
-    success: true,
-    data: images,
-  });
+    await cloudinary.uploader.destroy(video.public_id, {
+      resource_type: "video",
+    });
+
+    video.remove();
+    await event.save();
+
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ success: false });
+  }
 };
 
-// update Event
-export const updateEvent = async (req, res) => {
+export const updateEventVideo = async (req, res) => {
+  try {
+    const event = await findEvent(req.params.eventId);
+
+    const video = event?.videos?.id(req.params.videoId);
+    if (!video) return res.status(404).json({ message: "Video not found" });
+
+    await cloudinary.uploader.destroy(video.public_id, {
+      resource_type: "video",
+    });
+
+    const newVideo = await uploadVideo(req.file, event._id);
+
+    Object.assign(video, newVideo);
+    await event.save();
+
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+};
+
+// video chunk controller
+
+export const uploadVideoChunk = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const { title, description, deleteImageIds, setCoverImageId } = req.body;
+    const { index, fileName, totalChunks } = req.body;
 
-    // 1. update event basic fields
-    const event = await Event.findByIdAndUpdate(
-      eventId,
-      { title, description },
-      { new: true },
-    );
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
 
-    // 2. DELETE SELECTED IMAGES (VERY IMPORTANT)
-    if (deleteImageIds && deleteImageIds.length > 0) {
-      const imagesToDelete = await Gallery.find({
-        _id: { $in: deleteImageIds },
-        eventId,
-      });
+    // 1️⃣ INIT TRACKER
+    initUpload(eventId, safeFileName, totalChunks);
 
-      // delete from cloudinary first
-      await Promise.all(
-        imagesToDelete.map(async (img) => {
-          try {
-            if (img.public_id) {
-              await cloudinary.uploader.destroy(img.public_id);
-            }
-          } catch (err) {
-            console.log("Cloudinary delete failed:", img.public_id);
-          }
-        }),
-      );
+    // 2️⃣ SAVE CHUNK
+    const chunkDir = path.join("temp_chunks", eventId, safeFileName);
 
-      // then delete from DB
-      await Gallery.deleteMany({
-        _id: { $in: deleteImageIds },
-        eventId,
-      });
-    }
+    await fs.ensureDir(chunkDir);
 
-    // 3. ADD NEW IMAGES
-    let newImages = [];
+    const chunkPath = path.join(chunkDir, `chunk-${index}`);
 
-    if (req.files?.length > 0) {
-      newImages = await Promise.all(
-        req.files.map(async (file) => {
-          const fileUri = getDataUri(file);
+    await fs.move(req.file.path, chunkPath, { overwrite: true });
 
-          const result = await cloudinary.uploader.upload(fileUri, {
-            folder: `events/${eventId}`,
-          });
+    // 3️⃣ MARK RECEIVED
+    markChunkReceived(eventId, safeFileName, index);
 
-          return Gallery.create({
-            eventId,
-            imageUrl: result.secure_url,
-            public_id: result.public_id,
-          });
-        }),
-      );
+    // 4️⃣ AUTO CHECK COMPLETION
+    if (isUploadComplete(eventId, safeFileName)) {
+      console.log("All chunks received → merging...");
 
-      // if no cover image exists → set first uploaded
-      if (!event.coverImage && newImages.length > 0) {
-        event.coverImage = newImages[0].imageUrl;
-        await event.save();
-      }
-    }
-
-    // 4. OPTIONAL: set cover image manually
-    if (setCoverImageId) {
-      const coverImg = await Gallery.findById(setCoverImageId);
-
-      if (coverImg) {
-        event.coverImage = coverImg.imageUrl;
-        await event.save();
-      }
+      // AUTO MERGE TRIGGER
+      await mergeVideoChunksInternal(eventId, safeFileName);
     }
 
     return res.json({
       success: true,
-      message: "Event updated successfully",
-      data: event,
+      message: "Chunk uploaded",
+      index,
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Chunk upload failed",
     });
   }
 };
 
-// delete event
-export const deleteEvent = async (req, res) => {
+export const mergeVideoChunksInternal = async (eventId, fileName) => {
   try {
-    const { eventId } = req.params;
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
 
-    // 1. check if event exists
-    const event = await Event.findById(eventId);
+    const chunkDir = path.join(TEMP_CHUNKS_DIR, eventId, safeFileName);
 
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
+    const outputDir = "uploads/videos";
+    await fs.ensureDir(outputDir);
 
-    // 2. find all images linked to this event
-    const images = await Gallery.find({ eventId });
-
-    // 3. destroy images from Cloudinary (safe + parallel)
-    await Promise.all(
-      images.map(async (img) => {
-        try {
-          if (img.public_id) {
-            await safeDestroy(img.public_id);
-          }
-        } catch (err) {
-          console.log("Cloudinary delete failed:", img.public_id);
-        }
-      }),
+    const finalVideoPath = path.join(
+      outputDir,
+      `${Date.now()}-${safeFileName}`,
     );
 
-    // 4. delete images from MongoDB
-    await Gallery.deleteMany({ eventId });
+    // ❗ CHECK IF CHUNKS EXIST
+    const chunks = await fs.readdir(chunkDir);
 
-    // 5. delete event itself
-    await Event.findByIdAndDelete(eventId);
+    if (!chunks || chunks.length === 0) {
+      throw new Error("No chunks found for merging");
+    }
 
-    return res.status(200).json({
-      success: true,
-      message: "Event and all associated images deleted successfully",
+    // sort safely
+    const sortedChunks = chunks.sort((a, b) => {
+      const aIndex = parseInt(a.split("-")[1]);
+      const bIndex = parseInt(b.split("-")[1]);
+      return aIndex - bIndex;
     });
-  } catch (error) {
-    console.log("Delete Event Error:", error);
 
-    return res.status(500).json({
-      success: false,
-      message: "Server error while deleting event",
+    const writeStream = fs.createWriteStream(finalVideoPath);
+
+    // MERGE
+    for (const chunk of sortedChunks) {
+      const chunkPath = path.join(chunkDir, chunk);
+      const data = await fs.readFile(chunkPath);
+      writeStream.write(data);
+    }
+
+    writeStream.end();
+
+    await new Promise((resolve, reject) => {
+      writeStream.on("finish", resolve);
+      writeStream.on("error", reject);
     });
+
+    console.log("✅ Merge completed:", finalVideoPath);
+
+    // 🚀 CLOUDINARY UPLOAD
+    const result = await cloudinary.uploader.upload_large(finalVideoPath, {
+      resource_type: "video",
+      folder: `events/videos/${eventId}`,
+      chunk_size: 6 * 1024 * 1024, // 6MB
+      timeout: 240000, // 2 min safety
+    });
+
+    if (!result?.secure_url) {
+      throw new Error("Cloudinary upload failed");
+    }
+
+    console.log("✅ Cloudinary URL:", result.secure_url);
+
+    // 💾 SAVE TO DB
+    await Event.findByIdAndUpdate(eventId, {
+      $push: {
+        videos: {
+          url: result.secure_url,
+          public_id: result.public_id,
+          thumbnail: cloudinary.url(result.public_id, {
+            resource_type: "video",
+            format: "jpg",
+          }),
+        },
+      },
+    });
+
+    // 🧹 CLEANUP
+    await fs.remove(chunkDir);
+    await fs.remove(finalVideoPath);
+
+    return result.secure_url;
+  } catch (err) {
+    console.error("❌ Merge Error:", err);
+    throw err;
   }
 };

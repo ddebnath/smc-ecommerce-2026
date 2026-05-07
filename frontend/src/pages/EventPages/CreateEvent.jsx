@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/config/api";
 import { toast } from "sonner";
@@ -11,73 +11,85 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandGroup,
-  CommandItem,
-} from "@/components/ui/command";
+import MediaUploader from "@/utils/MediaUpoader";
+import { useNavigate } from "react-router-dom";
+import { UPLOAD_CONFIG } from "@/config/uploadConfig";
 
 const CreateEvent = () => {
   const { user } = useSelector((store) => store.user);
+  const navigate = useNavigate();
   const accessToken = localStorage.getItem("accessToken");
-
-  const role = user?.role;
-  const isAdmin = role === "admin" || role === "productOwner";
 
   const countries = useMemo(() => Country.getAllCountries(), []);
 
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-
-  const [countryOpen, setCountryOpen] = useState(false);
-  const [stateOpen, setStateOpen] = useState(false);
-  const [cityOpen, setCityOpen] = useState(false);
-
   const [selectedCountry, setSelectedCountry] = useState("");
 
   const [form, setForm] = useState({
     title: "",
     description: "",
-    date: null,
+    date: "",
     location: "",
     city: "",
     state: "",
     country: "",
     pinCode: "",
-    coverImage: null,
-    galleryImages: [],
   });
 
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ================= VIDEO CHUNK UPLOAD =================
+  const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB (recommended)
+
+  const uploadVideoInChunks = async (file, eventId) => {
+    let start = 0;
+    let index = 0;
+
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+
+    while (start < file.size) {
+      const chunk = file.slice(start, start + CHUNK_SIZE);
+
+      const formData = new FormData();
+      formData.append("chunk", chunk);
+      formData.append("index", index);
+      formData.append("fileName", safeFileName);
+      formData.append("totalChunks", Math.ceil(file.size / CHUNK_SIZE)); // IMPORTANT
+
+      await axios.post(
+        `${API_URL}/event/${eventId}/upload-video-chunk`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      start += CHUNK_SIZE;
+      index++;
+    }
+  };
   // ================= INPUT =================
   const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // ================= COUNTRY =================
   const handleCountryChange = (code) => {
     setSelectedCountry(code);
-
     setStates(State.getStatesOfCountry(code));
     setCities([]);
 
+    const countryName = countries.find((c) => c.isoCode === code)?.name;
+
     setForm((prev) => ({
       ...prev,
-      country: countries.find((c) => c.isoCode === code)?.name,
+      country: countryName,
       state: "",
       city: "",
     }));
@@ -95,97 +107,89 @@ const CreateEvent = () => {
   };
 
   // ================= CITY =================
-  const handleCityChange = (value) => {
-    setForm((prev) => ({
-      ...prev,
-      city: value,
-    }));
-  };
-
-  // COVER IMAGE
-  const handleCoverChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setForm((prev) => ({
-      ...prev,
-      coverImage: file,
-      coverPreview: URL.createObjectURL(file),
-    }));
-  };
-
-  // // ================= FILES =================
-  // const handleCoverChange = (e) => {
-  //   setForm((prev) => ({
-  //     ...prev,
-  //     coverImage: e.target.files?.[0],
-  //   }));
-  // };
-
-  // const handleGalleryChange = (e) => {
-  //   setForm((prev) => ({
-  //     ...prev,
-  //     galleryImages: Array.from(e.target.files),
-  //   }));
-  // };
-
-  // GALLERY IMAGES
-  const handleGalleryChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      galleryImages: Array.from(e.target.files),
-    }));
+  const handleCityChange = (city) => {
+    setForm((prev) => ({ ...prev, city }));
   };
 
   // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!form.title) return toast.error("Title is required");
+
     try {
       setLoading(true);
 
-      const formData = new FormData();
-
-      Object.keys(form).forEach((key) => {
-        if (key !== "coverImage" && key !== "galleryImages") {
-          formData.append(key, form[key]);
-        }
-      });
-
-      if (form.coverImage) {
-        formData.append("file", form.coverImage);
-      }
-
-      const res = await axios.post(`${API_URL}/event/create`, formData, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "multipart/form-data",
-        },
+      // 1️⃣ CREATE EVENT
+      const res = await axios.post(`${API_URL}/event/create`, form, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       const eventId = res.data.data._id;
 
-      if (form.galleryImages.length > 0) {
-        const galleryForm = new FormData();
+      // 2️⃣ IMAGES
+      const validImages = galleryImages.filter((f) =>
+        f.type.startsWith("image/"),
+      );
 
-        form.galleryImages.forEach((img) => {
-          galleryForm.append("files", img);
-        });
+      if (validImages.length > 0) {
+        const imgForm = new FormData();
+        validImages.forEach((img) => imgForm.append("files", img));
 
-        await axios.post(
-          `${API_URL}/event/${eventId}/upload-images`,
-          galleryForm,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "multipart/form-data",
-            },
+        await axios.post(`${API_URL}/event/${eventId}/images`, imgForm, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
           },
-        );
+        });
       }
 
-      toast.success("Event created successfully");
+      // 3️⃣ VIDEOS (CHUNKS + MERGE)
+      const validVideos = videos.filter(
+        (f) =>
+          f.type.startsWith("video/") && f.size <= UPLOAD_CONFIG.VIDEO.MAX_SIZE,
+      );
 
+      if (
+        validVideos.length > 0 &&
+        validVideos.length <= UPLOAD_CONFIG.VIDEO.MAX_COUNT
+      ) {
+        for (const video of validVideos) {
+          const safeFileName = video.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+
+          // 🎯 CONDITION
+          if (video.size <= UPLOAD_CONFIG.VIDEO.MAX_SIZE) {
+            // ✅ SMALL VIDEO → DIRECT UPLOAD
+            const formData = new FormData();
+            formData.append("videos", video);
+
+            await axios.post(`${API_URL}/event/${eventId}/videos`, formData, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "multipart/form-data",
+              },
+            });
+          } else {
+            // 🚀 LARGE VIDEO → CHUNKS
+            // await uploadVideoInChunks(video, eventId, safeFileName);
+            // // 🔗 MERGE AFTER CHUNKS
+            // await axios.post(
+            //   `${API_URL}/event/${eventId}/merge-video`,
+            //   { fileName: safeFileName },
+            //   {
+            //     headers: {
+            //       Authorization: `Bearer ${accessToken}`,
+            //     },
+            //   },
+            // );
+            toast.error("large video file not allowed and filterd out");
+          }
+        }
+      }
+
+      toast.success("Event created successfully 🎉");
+
+      // RESET STATE (UNCHANGED UI)
       setForm({
         title: "",
         description: "",
@@ -195,39 +199,40 @@ const CreateEvent = () => {
         state: "",
         country: "",
         pinCode: "",
-        coverImage: null,
-        galleryImages: [],
       });
 
-      setSelectedCountry("");
+      setGalleryImages([]);
+      setVideos([]);
       setStates([]);
       setCities([]);
+      setSelectedCountry("");
     } catch (err) {
       console.log(err);
       toast.error("Failed to create event");
     } finally {
       setLoading(false);
+      navigate("/event");
     }
   };
 
+  // ================= UI (UNCHANGED) =================
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4 bg-gray-100 rounded-lg">
+    <div className="max-w-2xl mx-auto py-10 px-4">
       <Card className="shadow-xl rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-center">Create Event ({role})</CardTitle>
+          <CardTitle className="text-center text-xl">Create Event</CardTitle>
         </CardHeader>
 
-        <CardContent className="">
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* TITLE */}
             <Input
               name="title"
               placeholder="Event Title"
               value={form.title}
               onChange={handleChange}
+              required
             />
 
-            {/* DESCRIPTION */}
             <Textarea
               name="description"
               placeholder="Event Description"
@@ -235,103 +240,53 @@ const CreateEvent = () => {
               onChange={handleChange}
             />
 
-            {/* LOCATION */}
             <Input
               name="location"
               placeholder="Location"
-              value={form.address}
+              value={form.location}
               onChange={handleChange}
             />
 
-            {/* COUNTRY */}
-            <Popover open={countryOpen} onOpenChange={setCountryOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  {form.country || "Select Country"}
-                </Button>
-              </PopoverTrigger>
+            <select
+              className="w-full border p-2 rounded"
+              value={selectedCountry}
+              onChange={(e) => handleCountryChange(e.target.value)}
+            >
+              <option value="">Select Country</option>
+              {countries.map((c) => (
+                <option key={c.isoCode} value={c.isoCode}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
 
-              <PopoverContent className="p-0">
-                <Command>
-                  <CommandInput placeholder="Search country..." />
-                  <CommandList className="max-h-60 overflow-y-auto">
-                    <CommandGroup>
-                      {countries.map((c) => (
-                        <CommandItem
-                          key={c.isoCode}
-                          onSelect={() => {
-                            handleCountryChange(c.isoCode);
-                            setCountryOpen(false);
-                          }}
-                        >
-                          {c.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <select
+              className="w-full border p-2 rounded"
+              onChange={(e) =>
+                handleStateChange(
+                  e.target.value,
+                  e.target.selectedOptions[0].text,
+                )
+              }
+            >
+              <option value="">Select State</option>
+              {states.map((s) => (
+                <option key={s.isoCode} value={s.isoCode}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
 
-            {/* STATE */}
-            <Popover open={stateOpen} onOpenChange={setStateOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  {form.state || "Select State"}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="p-0">
-                <Command>
-                  <CommandInput placeholder="Search state..." />
-                  <CommandList className="max-h-60 overflow-y-auto">
-                    <CommandGroup>
-                      {states.map((s) => (
-                        <CommandItem
-                          key={s.isoCode}
-                          onSelect={() => {
-                            handleStateChange(s.isoCode, s.name);
-                            setStateOpen(false);
-                          }}
-                        >
-                          {s.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-
-            {/* CITY */}
-            <Popover open={cityOpen} onOpenChange={setCityOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  {form.city || "Select City"}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="p-0">
-                <Command>
-                  <CommandInput placeholder="Search city..." />
-                  <CommandList className="max-h-60 overflow-y-auto">
-                    <CommandGroup>
-                      {cities.map((c, i) => (
-                        <CommandItem
-                          key={i}
-                          onSelect={() => {
-                            handleCityChange(c.name);
-                            setCityOpen(false);
-                          }}
-                        >
-                          {c.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <select
+              className="w-full border p-2 rounded"
+              value={form.city}
+              onChange={(e) => handleCityChange(e.target.value)}
+            >
+              <option value="">Select City</option>
+              {cities.map((c, i) => (
+                <option key={i}>{c.name}</option>
+              ))}
+            </select>
 
             <Input
               type="date"
@@ -339,7 +294,7 @@ const CreateEvent = () => {
               value={form.date}
               onChange={handleChange}
             />
-            {/* PINCODE */}
+
             <Input
               name="pinCode"
               placeholder="Pin Code"
@@ -347,31 +302,13 @@ const CreateEvent = () => {
               onChange={handleChange}
             />
 
-            {/* COVER IMAGE */}
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleCoverChange}
-              className="p-3 mb-2"
+            <MediaUploader
+              images={galleryImages}
+              setImages={setGalleryImages}
+              videos={videos}
+              setVideos={setVideos}
             />
 
-            {/* GALLERY */}
-            <Input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleGalleryChange}
-              className="my-5 "
-            />
-
-            {/* ROLE INFO */}
-            {isAdmin && (
-              <p className="text-sm text-blue-600">
-                Admin/Product Owner Event Creation Enabled
-              </p>
-            )}
-
-            {/* SUBMIT */}
             <Button className="w-full" disabled={loading}>
               {loading ? "Creating..." : "Create Event"}
             </Button>

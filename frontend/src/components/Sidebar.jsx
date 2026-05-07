@@ -79,6 +79,11 @@ const Sidebar = () => {
               icon={PlusCircle}
               label="Create Event"
             />
+            <SubLink
+              to="/dashboard/events/manage"
+              icon={PackageSearch}
+              label="Manage Events"
+            />
           </div>
         )}
 

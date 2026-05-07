@@ -13,7 +13,7 @@ import {
   isAdmin,
   authorizeRoles,
 } from "../middleware/Auth.middleware.js";
-import { multipleUpload } from "../middleware/multer.js";
+import { multipleImageUpload } from "../middleware/multer.js";
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.post(
   "/add",
   isAuthenticated,
   authorizeRoles("admin", "productOwner"),
-  multipleUpload,
+  multipleImageUpload,
   addProduct,
 );
 
@@ -47,7 +47,7 @@ router.put(
   "/update/:productId",
   isAuthenticated,
   authorizeRoles("admin", "productOwner"),
-  multipleUpload,
+  multipleImageUpload,
   updateProduct,
 );
 

@@ -35,6 +35,7 @@ import ImageGallery from "@/pages/ImageGallery/ImageGallery";
 import CreateEvent from "@/pages/EventPages/CreateEvent";
 import EventDetails from "@/pages/EventPages/EventDetails";
 import Events from "@/pages/EventPages/Events";
+import ManageEvents from "@/pages/EventPages/ManageEvents";
 
 const AppRoutes = () => {
   return (
@@ -128,6 +129,7 @@ const AppRoutes = () => {
 
         {/* Event */}
         <Route path="events/create" element={<CreateEvent />} />
+        <Route path="events/manage" element={<ManageEvents />} />
       </Route>
 
       {/* Product Ownder */}

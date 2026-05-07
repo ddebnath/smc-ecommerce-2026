@@ -1,55 +1,124 @@
 import express from "express";
+
 import {
   authorizeRoles,
   isAuthenticated,
 } from "../middleware/Auth.middleware.js";
-import { multipleUpload, singleUpload } from "../middleware/multer.js";
+
+import {
+  multipleImageUpload,
+  multipleVideoUpload,
+  uploadChunk,
+} from "../middleware/multer.js";
 
 import {
   createEvent,
   updateEvent,
-  uploadEventImages,
   deleteEvent,
   getAllEvents,
   getEventById,
+  uploadEventImages,
+  deleteEventImage,
+  setCoverImage,
+  uploadEventVideos,
+  deleteEventVideo,
+  updateEventVideo,
+  uploadVideoChunk,
 } from "../controllers/event.controllers.js";
 
 const router = express.Router();
 
+// ======= FETCH ALL EVENTS =================
+
+router.get("/get", getAllEvents);
+router.get("/details/:id", getEventById);
+
+// ===== EVENTS =====
 router.post(
   "/create",
   isAuthenticated,
   authorizeRoles("admin", "productOwner"),
-  singleUpload, //single image
+  multipleImageUpload,
+  multipleVideoUpload,
   createEvent,
 );
 
-router.post(
-  "/:eventId/upload-images",
+router.get("/get", getAllEvents);
+router.get("/details/:id", getEventById);
+
+router.put(
+  "/update/:eventId",
   isAuthenticated,
   authorizeRoles("admin", "productOwner"),
-  multipleUpload, // multiple images
-  uploadEventImages,
+  multipleImageUpload,
+  updateEvent,
 );
 
-router.get("/get", getAllEvents);
-router.get("/:id", getEventById);
-
-// delete event by id
 router.delete(
-  "/:eventId",
+  "/delete/:eventId",
   isAuthenticated,
   authorizeRoles("admin", "productOwner"),
   deleteEvent,
 );
 
-// update event
-router.put(
-  "/update/:eventId",
+// ===== IMAGES =====
+router.post(
+  "/:eventId/images",
   isAuthenticated,
   authorizeRoles("admin", "productOwner"),
-  multipleUpload, // for adding new images during update
-  updateEvent,
+  multipleImageUpload,
+  uploadEventImages,
 );
+
+router.delete(
+  "/images/:imageId",
+  isAuthenticated,
+  authorizeRoles("admin", "productOwner"),
+  deleteEventImage,
+);
+
+router.post(
+  "/:eventId/videos",
+  isAuthenticated,
+  authorizeRoles("admin", "productOwner"),
+  multipleVideoUpload,
+  uploadEventVideos,
+);
+
+router.patch(
+  "/images/:imageId/cover",
+  isAuthenticated,
+  authorizeRoles("admin", "productOwner"),
+  setCoverImage,
+);
+
+// ===== VIDEOS =====
+router.post(
+  "/:eventId/videos",
+  isAuthenticated,
+  authorizeRoles("admin", "productOwner"),
+  multipleVideoUpload,
+  uploadEventVideos,
+);
+
+router.delete(
+  "/:eventId/videos/:videoId",
+  isAuthenticated,
+  authorizeRoles("admin", "productOwner"),
+  deleteEventVideo,
+);
+
+router.put(
+  "/:eventId/videos/:videoId",
+  isAuthenticated,
+  authorizeRoles("admin", "productOwner"),
+  updateEventVideo,
+);
+
+// =============================
+// CHUNK ROUTE (FIXED)
+// =============================
+router.post("/:eventId/upload-video-chunk", uploadChunk, uploadVideoChunk);
+// router.post("/:eventId/merge-video", mergeVideoChunks);
 
 export default router;

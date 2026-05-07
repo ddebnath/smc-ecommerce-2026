@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/config/api";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Eye, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
-import store from "@/redux/store";
+import { getEventStatus } from "@/utils/eventStatus";
 
 const Events = () => {
   const navigate = useNavigate();
@@ -18,20 +18,19 @@ const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // FETCH EVENTS
+  // ================= FETCH EVENTS =================
   const fetchEvents = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${API_URL}/event/get`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const res = await axios.get(`${API_URL}/event/get`);
 
       if (res.data.success) {
         setEvents(res.data.data);
       }
     } catch (err) {
       console.log(err);
+      toast.error("Failed to fetch events");
     } finally {
       setLoading(false);
     }
@@ -41,57 +40,48 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // DELETE EVENT
+  // ================= DELETE EVENT =================
   const handleDelete = async (id) => {
     try {
-      const confirm = window.confirm("Delete this event?");
-      if (!confirm) return;
+      const ok = window.confirm("Delete this event?");
+      if (!ok) return;
 
-      await axios.delete(`${API_URL}/event/${id}`, {
+      await axios.delete(`${API_URL}/event/delete/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       toast.success("Event deleted");
-
       setEvents((prev) => prev.filter((e) => e._id !== id));
     } catch (err) {
-      toast.error("You dont have permission to delete an event");
+      console.log(err);
+      toast.error("You don't have permission to delete");
     }
   };
 
   const getDashboardPath = (role) => {
-    switch (role) {
-      case "admin":
-        return "/dashboard/events/create";
-      case "productOwner":
-        return "/product-owner-dashboard/events/create";
-      default:
-        return null;
-    }
+    if (role === "admin") return "/dashboard/events/create";
+    if (role === "productOwner")
+      return "/product-owner-dashboard/events/create";
+    return null;
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-10 px-4 ">
+    <div className="bg-gray-50 min-h-screen py-10 px-4">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-25">
-          <h1 className="text-3xl font-bold text-gray-800 ">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-3xl font-bold text-gray-800">
             🎉 Events Dashboard
           </h1>
 
-          <Link
-            to={
-              ((user && user?.role === "admin") ||
-                (user && user?.role === "productOwner")) &&
-              `${getDashboardPath(user?.role)}`
-            }
-          >
-            {user && user?.role !== "user" && (
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                + Create Event
-              </Button>
-            )}
-          </Link>
+          {user && user?.role !== "user" && (
+            <Button
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => navigate(getDashboardPath(user?.role))}
+            >
+              + Create Event
+            </Button>
+          )}
         </div>
 
         {/* LOADING */}
@@ -102,100 +92,94 @@ const Events = () => {
         )}
 
         {/* EMPTY */}
-        {!loading && events?.length === 0 && (
+        {!loading && events.length === 0 && (
           <p className="text-center text-gray-500">No events available</p>
         )}
 
         {/* GRID */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {events?.map((event) => (
+          {events.map((event) => (
             <Card
               key={event._id}
-              className="overflow-hidden items-center justify-center rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 group bg-white"
+              className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 bg-white cursor-pointer"
             >
-              {/* start */}
-              <div className="relative w-full h-[420px] md:h-[540px] rounded-3xl overflow-hidden shadow-xl">
-                {/* BACKGROUND IMAGE */}
-
+              {/* IMAGE */}
+              <div className="relative h-105 overflow-hidden">
                 <img
-                  src={event?.coverImage?.url}
-                  alt={event?.title}
-                  className="w-full h-full object-cover scale-105"
+                  src={event?.coverImage?.url || "/placeholder.jpg"}
+                  alt={event.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
 
-                {/* GRADIENT OVERLAY */}
+                {/* OVERLAY (NO CLICK BLOCKING) */}
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
 
-                <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/30 to-transparent" />
+                {/* STATUS BADGE */}
+                <div className="absolute top-3 left-3 z-10">
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full text-white ${
+                      getEventStatus(event.date) === "Upcoming"
+                        ? "bg-blue-500/80"
+                        : getEventStatus(event.date) === "Past"
+                          ? "bg-red-500/80"
+                          : "bg-green-500/80"
+                    }`}
+                  >
+                    {getEventStatus(event.date)}
+                  </span>
+                </div>
 
                 {/* CONTENT */}
-                <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 text-white">
-                  <div className="max-w-4xl">
-                    {/* TITLE */}
+                <div className="absolute bottom-0 left-0 w-full p-5 text-white">
+                  <h2 className="text-lg font-semibold line-clamp-2">
+                    {event.title}
+                  </h2>
 
-                    <Link to={`/events/${event._id}`}>
-                      <div className="flex flex-col justify-center text-center items-center gap-3">
-                        <h1 className="sm: text-2xl font-bold leading-tight">
-                          {event?.title}
-                        </h1>
+                  <p className="text-xs text-gray-200 mt-1">
+                    Click to explore gallery
+                  </p>
 
-                        <div className="flex justify-center items-center">
-                          <Link to={`/events/${event._id}`}>
-                            <span className="text-white text-lg bg-white/15 backdrop-blur px-3 py-1 rounded-full">
-                              Event Gallery
-                            </span>
-                          </Link>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
+                  {/* ACTIONS */}
+                  <div className="mt-4 flex justify-between items-center">
+                    <Button
+                      size="sm"
+                      className="bg-white text-black hover:bg-gray-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/events/${event._id}`);
+                      }}
+                    >
+                      <Eye size={16} className="mr-1" /> View
+                    </Button>
 
-                  {/* META INFO */}
-
-                  <div className="flex flex-wrap md:text-sm">
-                    <CardContent className="p-5 flex items-center justify-center gap-4">
-                      {/* ACTIONS */}
-                      {/* EDIT */}
-                      {user && user?.role !== "user" && (
-                        <Link to={``}>
-                          <Button
-                            size="lg"
-                            variant="outline"
-                            className="bg-amber-700 w-12"
-                          >
-                            <Pencil
-                              size={35}
-                              fill={100}
-                              className="text-white"
-                            />
-                          </Button>
-                        </Link>
-                      )}
-
-                      {/* VIEW */}
-                      <Link to={`/events/${event._id}`} className="flex-1">
-                        <Button size="lg" className="w-12">
-                          <Eye size={25} />
-                        </Button>
-                      </Link>
-
-                      {/* DELETE */}
-
-                      {user && user?.role !== "user" && (
+                    {user && user?.role !== "user" && (
+                      <div className="flex gap-2">
                         <Button
-                          className="bg-white"
-                          variant="destructive"
-                          onClick={() => handleDelete(event._id)}
+                          size="icon"
+                          className="bg-amber-500 hover:bg-amber-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/events/edit/${event._id}`);
+                          }}
                         >
-                          <Trash2 size={40} fill={10} className="text-white" />
+                          <Pencil size={16} />
                         </Button>
-                      )}
-                    </CardContent>
+
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(event._id);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-
-              {/* end */}
-              {/* CONTENT */}
             </Card>
           ))}
         </div>
