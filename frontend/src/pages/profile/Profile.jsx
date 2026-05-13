@@ -134,7 +134,7 @@ const Profile = () => {
       formData.append("zipcode", updateUser.zipcode);
 
       if (file) {
-        formData.append("file", file); // Append the file to the form data
+        formData.append("files", file); // Append the file to the form data
       }
 
       const response = await axios.put(

@@ -639,7 +639,7 @@ export const updateUser = async (req, res) => {
     let profilePicUrl = user.profilePic; // store the current profile picture URL
     let profilePicPublicId = user.profilePicPublicId; // store the current profile picture public ID
 
-    const file = req.file;
+    const file = req.files && req.files[0]; // Handle multiple files if needed
 
     if (file) {
       if (profilePicPublicId) {
